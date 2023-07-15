@@ -26,7 +26,7 @@ public class TaskManager {
         return epic;
     }
 
-    //Создание подзадачи в определенный епик с проверкой наличия епика SUBTASK ???Вопрос про id???
+    //Создание подзадачи в определенный епик с проверкой наличия епика SUBTASK
     public SubTask saveSubTask(SubTask subTask) {
         if (subTask == null) {
             return null;
@@ -192,7 +192,7 @@ public class TaskManager {
         String statusDone = "";
         String statusProgress = "";
         String statusNew = "";
-        for (Epic epic : epicStorage.values()) {///////////////////////////////////
+        for (Epic epic : epicStorage.values()) {
             if (epic.getSubTaskId().isEmpty()) {
                 Epic epicModofiedStatus = epic;
                 epicModofiedStatus.updateStatusEpik("NEW");
