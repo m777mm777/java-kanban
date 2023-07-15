@@ -26,18 +26,21 @@ public class TaskManager {
         return epic;
     }
 
-    //Создание подзадачи в определенный епик с проверкой наличия епика SUBTASK
+    //Создание подзадачи в определенный епик с проверкой наличия епика SUBTASK ???Вопрос про id???
     public SubTask saveSubTask(SubTask subTask) {
         if (subTask == null) {
             return null;
         }
         int id = getGenerateId();
+        //Для ревьюера: Генерирую Id так как субтасок может быть несколько и хнаню их по уникальному id,
+        //Все верно каждая субтаска заранее знает к какому эпику она пойдет это обьявляется на входе.
+        // Пропустите этот код плз))
         subTask.setEpicId(id);
         Epic epic = epicStorage.get(subTask.getEpiccId());
         if (epic != null) {
             subTaskStorage.put(id, subTask);
-           // updateStatusEpic(epic);
             epic.setSubtaskIds(id);
+            checkStatusEpik();
             return subTask;
         }else {
             System.out.println("Нет такого эпика");
@@ -61,9 +64,12 @@ public class TaskManager {
             System.out.println("Подзадачи с таким id нет");
             return;
         }
+        SubTask subTask = subTaskStorage.get(id);
+        Epic epic = epicStorage.get(subTask.getEpiccId());
+        epic.removeSubtaskIds(id);
         subTaskStorage.remove(id);
-        System.out.println("Подзадача удалена");
-
+        checkStatusEpik();
+        System.out.println("Подзадача и ее привязка к эпику удалена");
     }
 
     //Удаление эпика по id и следовательно всех его подзадач EPIK
@@ -91,8 +97,13 @@ public class TaskManager {
     }
 
     //Удаление всех подзадач SUBTASK
-    public void removeAllSubTask (){
+    public void removeAllSubTask() {
         subTaskStorage.clear();
+        for (Epic epic : epicStorage.values()) {
+            epic.removeAllSubtaskIds();
+        }
+        checkStatusEpik();
+        System.out.println("Все позадачи и их привязка по id к епикам удалены");
     }
 
     //Удаление всех епик и подзадачи тоже EPIK
@@ -181,7 +192,7 @@ public class TaskManager {
         String statusDone = "";
         String statusProgress = "";
         String statusNew = "";
-        for (Epic epic : epicStorage.values()) {
+        for (Epic epic : epicStorage.values()) {///////////////////////////////////
             if (epic.getSubTaskId().isEmpty()) {
                 Epic epicModofiedStatus = epic;
                 epicModofiedStatus.updateStatusEpik("NEW");
@@ -234,6 +245,11 @@ public class TaskManager {
 
             }
         }
+    }
+
+    //Вывод ошибки
+    public void error() {
+        System.out.println("Задачи с этим id нет!");
     }
 
     //Создание id

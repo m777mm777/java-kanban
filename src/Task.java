@@ -50,10 +50,6 @@ public class Task {
         this.status = status;
     }
 
-    public void error() {
-        System.out.println("Задачи с этим id нет!");
-    }
-
     @Override
     public String toString() {
         return "Task{" +
