@@ -24,7 +24,7 @@ public class Epic extends Task {
         subTaskIds.removeAll(subTaskIds);
     }
 
-    public void removeSubtaskIds(int id) {
+    public void removeIdFromSubtaskIds(int id) {
         subTaskIds.remove(id);
     }
 

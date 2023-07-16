@@ -35,7 +35,7 @@ public class Main {
         taskManager.checkStatusEpik(); //Сверка и обновление статуса всех епиков
 
         System.out.println("Измененный статус задачи 1 " + taskManager.getByTaskId(task1.getId()));
-        System.out.println("Измененный статус подзадачи 3 " + taskManager.getBySubTaskId(subTask3.getEpicId()));
+        System.out.println("Измененный статус подзадачи 3 " + taskManager.getBySubTaskId(subTask3.getSubTaskId()));
         System.out.println("Измененный статус Епик2 " + taskManager.getByEpikId(epic2.getId()));
 
         taskManager.removeTask(1); // Удаление задачи с id 1

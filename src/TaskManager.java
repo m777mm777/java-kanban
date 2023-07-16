@@ -32,10 +32,7 @@ public class TaskManager {
             return null;
         }
         int id = getGenerateId();
-        //Для ревьюера: Генерирую Id так как субтасок может быть несколько и хнаню их по уникальному id,
-        //Все верно каждая субтаска заранее знает к какому эпику она пойдет это обьявляется на входе.
-        // Пропустите этот код плз))
-        subTask.setEpicId(id);
+        subTask.setSubTaskId(id);
         Epic epic = epicStorage.get(subTask.getEpiccId());
         if (epic != null) {
             subTaskStorage.put(id, subTask);
@@ -66,7 +63,7 @@ public class TaskManager {
         }
         SubTask subTask = subTaskStorage.get(id);
         Epic epic = epicStorage.get(subTask.getEpiccId());
-        epic.removeSubtaskIds(id);
+        epic.removeIdFromSubtaskIds(id);
         subTaskStorage.remove(id);
         checkStatusEpik();
         System.out.println("Подзадача и ее привязка к эпику удалена");
@@ -174,6 +171,7 @@ public class TaskManager {
             return;
         }
         taskStorage.put(epic.getId(), epic);
+        checkStatusEpik();
     }
 
     //Обновление-Перезапись подзадачи с сохранением id для сверщика Епиков
@@ -185,6 +183,7 @@ public class TaskManager {
             return;
         }
         subTaskStorage.put(subTask.getId(), subTask);
+        checkStatusEpik();
     }
 
     //Проверка и обновление статуса для всех Епиков EPIK
