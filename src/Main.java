@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
 
         Task task1 = new Task("Задача №1", "Описание задачи №1");
         Task task2 = new Task("Задача №2", "Описание задачи №2");
@@ -26,19 +27,17 @@ public class Main {
         taskManager.saveSubTask(subTask2); //Создание подзадачи и присвоение ее конкретному Епику
         taskManager.saveSubTask(subTask3); //Создание подзадачи и присвоение ее конкретному Епику
 
-        System.out.println("Все задачи " + taskManager.getAllTasks());
-        System.out.println("Все эпики  " + taskManager.getAllEpik());
-        System.out.println("Все подзадачи  " + taskManager.getAllSubTask());
+        taskManager.getByEpikId(3);//Получение Епика должно отразится в истории
+        taskManager.getByEpikId(4);//Получение Епика должно отразится в истории
 
-        taskManager.updateTask(task1,"IN_PROGRESS"); //Смена статуса задачи 1
-        taskManager.updateSubTask(subTask3,"DONE"); //Смена статуса подзадачи 1
-        taskManager.checkStatusEpik(); //Сверка и обновление статуса всех епиков
+        taskManager.updateTask(task1,TaskStatus.IN_PROGRESS); //Смена статуса задачи 1 должно отразится в истории
+        taskManager.updateSubTask(subTask3,TaskStatus.DONE); //Смена статуса подзадачи 1 должно отразится в истории
 
-        System.out.println("Измененный статус задачи 1 " + taskManager.getByTaskId(task1.getId()));
-        System.out.println("Измененный статус подзадачи 3 " + taskManager.getBySubTaskId(subTask3.getSubTaskId()));
-        System.out.println("Измененный статус Епик2 " + taskManager.getByEpikId(epic2.getId()));
 
-        taskManager.removeTask(1); // Удаление задачи с id 1
-        taskManager.removeEpik(3); // Удаление Епика c id 3 и следовательно его подзадач
+        List<Task> history = taskManager.getHistory(); //Получение Истории просмотров
+
+        System.out.println("История просмотров задач " + history);//Печать истории
+
+
     }
 }
