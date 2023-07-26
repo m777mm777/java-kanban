@@ -1,8 +1,12 @@
+package com.yandex.kanban.service;
+import com.yandex.kanban.model.Task;
+
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
+
     //Коллекция храненя истории
     private final List<Task> history = new LinkedList<>();
     //Максимальный размер количество хранение истории
@@ -10,7 +14,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
    public List<Task> getHistory() {
-        return history;
+        return List.copyOf(history);
     }
 
     //Добавление в историю просмотров и удаление старых

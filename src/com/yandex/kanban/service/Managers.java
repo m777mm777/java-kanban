@@ -1,3 +1,5 @@
+package com.yandex.kanban.service;
+
 
 public final class Managers {
 

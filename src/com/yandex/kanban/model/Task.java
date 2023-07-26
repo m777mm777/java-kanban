@@ -1,3 +1,6 @@
+package com.yandex.kanban.model;
+import com.yandex.kanban.service.TaskStatus;
+
 import java.util.Objects;
 
 public class Task {
@@ -6,16 +9,23 @@ public class Task {
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description, TaskStatus status) {
+    public Task(String name, String description, TaskStatus status, int id) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.id = id;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
+    }
+
+    public Task(String name, String description, int id) {
+        this.name = name;
+        this.description = description;
+        this.id = id;
     }
 
     public Integer getId() {

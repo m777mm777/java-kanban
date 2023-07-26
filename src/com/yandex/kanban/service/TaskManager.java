@@ -1,6 +1,9 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+package com.yandex.kanban.service;
+
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.SubTask;
 import java.util.List;
+import com.yandex.kanban.model.Task;
 
 public interface TaskManager {
 
@@ -19,7 +22,7 @@ public interface TaskManager {
     public void removeTask(int id);
 
     //Удаление подзадачи по id SUBTASK
-    public void removeSubTask(int id);
+    public void removeSubTask(Integer id);
 
     //Удаление эпика по id и следовательно всех его подзадач EPIK
     public void removeEpik(int id);
@@ -43,31 +46,25 @@ public interface TaskManager {
     public Epic getByEpikId(int epicId);
 
     //Получение всех задач TASK
-    public ArrayList<Task> getAllTasks();
+    public List<Task> getAllTasks();
 
     //Получение всех епиков EPIK
-    public ArrayList<Epic> getAllEpik();
+    public List<Task> getAllEpik();
 
     //Получение всех подзадачь из всех эпиков без самих эпиков SUBTASK
-    public ArrayList<Epic> getAllSubTask();
+    public List<Task> getAllSubTask();
 
     //Получение всех задач одного Эпика
-    public HashMap<Integer, HashMap<Integer, SubTask>> getSubtaskByEpik(ArrayList<Integer> subTaskId);
+    public List<SubTask> getSubtaskByEpik(int id);
 
     //Обновление-Перезапись задач с сохранением id
-    public void updateTask(Task task, TaskStatus status);
+    public void updateTask(Task task);
 
     //Обновление-Перезапись Епика с сохранением id
     public void updateEpic(Epic epic);
 
     //Обновление-Перезапись подзадачи с сохранением id для сверщика Епиков
-    public void updateSubTask(SubTask subTask, TaskStatus status);
-
-    //Проверка и обновление статуса для всех Епиков EPIK
-    public void checkStatusEpik();
-
-    //Вывод ошибки
-    public void error();
+    public void updateSubTask(SubTask subTask);
 
     public List<Task> getHistory();
 }

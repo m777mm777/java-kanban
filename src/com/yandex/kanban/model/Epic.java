@@ -1,35 +1,36 @@
+package com.yandex.kanban.model;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
 
-    private ArrayList<Integer> subTaskIds = new ArrayList<>();
+    private List<Integer> subTaskIds = new ArrayList<>();
 
-    public Epic(String name, String description, TaskStatus status) {
-        super(name, description, status);
-    }
 
     public Epic(String name, String description) {
         super(name, description);
     }
 
-    public ArrayList<Integer> getSubTaskId() {
+    public Epic(String name, String description, int id) {
+
+        super(name, description, id);
+
+    }
+
+    public List<Integer> getSubTaskId() {
         return subTaskIds;
     }
 
-    public void setSubtaskIds(int id) {
+    public void addSubtaskIds(int id) {
         subTaskIds.add(id);
     }
 
     public void removeAllSubtaskIds() {
-        subTaskIds.removeAll(subTaskIds);
+        subTaskIds.clear();
     }
 
-    public void removeIdFromSubtaskIds(int id) {
+    public void removeIdFromSubtaskIds(Integer id) {
         subTaskIds.remove(id);
-    }
-
-    public void updateStatusEpik (TaskStatus status) {
-        this.status = status;
     }
 
     @Override
