@@ -1,5 +1,4 @@
 package com.yandex.kanban.model;
-import com.yandex.kanban.service.TaskStatus;
 
 import java.util.Objects;
 

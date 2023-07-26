@@ -1,9 +1,8 @@
 package com.yandex.kanban.model;
-import com.yandex.kanban.service.TaskStatus;
 
 public class SubTask extends Task {
 
-    private Integer epicId;
+    private final Integer epicId;
 
     public SubTask(String name, String description, TaskStatus status, int id, Integer epicId) {
         super(name, description, status, id);
@@ -12,10 +11,6 @@ public class SubTask extends Task {
     public SubTask(String name, String description, Integer epicId) {
         super(name, description);
         this.epicId = epicId;
-    }
-
-    public Integer getSubTaskId() {
-        return id;
     }
 
     public int getEpicId() {

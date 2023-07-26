@@ -4,11 +4,7 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
-import com.yandex.kanban.service.TaskStatus;
-
-
-import java.util.ArrayList;
-import java.util.List;
+import com.yandex.kanban.model.TaskStatus;
 
 public class Main {
 

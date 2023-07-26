@@ -2,6 +2,7 @@ package com.yandex.kanban.service;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
+import com.yandex.kanban.model.TaskStatus;
 
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             subTaskStorage.put(id, subTask);
             epic.addSubtaskIds(id);
-            checkStatusEpik();
+            checkStatusEpikId(epic);
             return subTask;
         }else {
             System.out.println("Нет такого эпика");
@@ -79,10 +80,11 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Подзадачи с таким id нет");
             return;
         }
-        Epic epic = epicStorage.get(subTask.getEpicId());
+
+        Integer epicId = subTask.getEpicId();
+        Epic epic = epicStorage.get(epicId);
         epic.removeIdFromSubtaskIds(id);
-        Integer epikId = subTask.getEpicId();
-        checkStatusEpikId(epikId);
+        checkStatusEpikId(epic);
         System.out.println("Подзадача и ее привязка к эпику удалена");
     }
 
@@ -118,8 +120,9 @@ public class InMemoryTaskManager implements TaskManager {
         subTaskStorage.clear();
         for (Epic epic : epicStorage.values()) {
             epic.removeAllSubtaskIds();
+            checkStatusEpikId(epic);
         }
-        checkStatusEpik();
+
         System.out.println("Все позадачи и их привязка по id к епикам удалены");
     }
 
@@ -178,11 +181,12 @@ public class InMemoryTaskManager implements TaskManager {
         List<SubTask> subTaskByEpik = new ArrayList<>();
 
         for (Integer idBySubTaskByEpik : subTaskIds) {
-            if (subTaskStorage.get(idBySubTaskByEpik) == null) {
+
+            SubTask subTask = subTaskStorage.get(idBySubTaskByEpik);
+            if (subTask == null) {
                 System.out.println("Ошибка, ID подзадачи привязан а подзадачи нет");
                 continue;
             }
-            SubTask subTask = subTaskStorage.get(idBySubTaskByEpik);
             subTaskByEpik.add(subTask);
         }
         return subTaskByEpik;
@@ -209,7 +213,6 @@ public class InMemoryTaskManager implements TaskManager {
         Epic values = epicStorage.get(epicId);
         values.setName(epic.getName());
         values.setDescription(epic.getDescription());
-        epicStorage.put(values.getId(), values);
 
     }
 
@@ -221,125 +224,37 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = subTask.getId();
         subTaskStorage.put(id, subTask);
-        Integer epikId = subTask.getEpicId();
-        checkStatusEpikId(epikId);
+        Epic epic = epicStorage.get(subTask.getEpicId());
+        checkStatusEpikId(epic);
     }
 
     //Проверка и обновление статуса EPIK по id
-    private void checkStatusEpikId(Integer id) {
+    private void checkStatusEpikId(Epic epic) {
 
-        TaskStatus statusDone = TaskStatus.NULL;
-        TaskStatus statusProgress = TaskStatus.NULL;
-        TaskStatus statusNew = TaskStatus.NULL;
+        if (epic.getSubTaskId().size() == 0) {
+            epic.setStatus(TaskStatus.NEW);
+            return;
+        }
 
-        Epic epic = epicStorage.get(id);
+        boolean allSubtaskIsNew = true;
+        boolean allSubtaskIsDone = true;
 
-        for (Integer idSubtaskByEpik : epic.getSubTaskId()) {
-            SubTask subTask = subTaskStorage.get(idSubtaskByEpik);
-            TaskStatus status = subTask.getStatus();
-            if (status.equals(TaskStatus.IN_PROGRESS)) {
-                statusProgress = TaskStatus.IN_PROGRESS;
-            } else if (status.equals(TaskStatus.DONE)) {
-                statusDone = TaskStatus.DONE;
-            }else {
-                statusNew = TaskStatus.NEW;
+        for (Integer epicSubtaskId : epic.getSubTaskId()) {
+            TaskStatus status = subTaskStorage.get(epicSubtaskId).getStatus();
+            if (!status.equals(TaskStatus.NEW)) {
+                allSubtaskIsNew = false;
+            }
+            if (!status.equals(TaskStatus.DONE)) {
+                allSubtaskIsDone = false;
             }
         }
 
-        if (statusProgress.equals(TaskStatus.IN_PROGRESS)) {
-            Epic epicModofiedStatus = epic;
-            epicModofiedStatus.setStatus(TaskStatus.IN_PROGRESS);
-            updateEpic(epicModofiedStatus);
-            statusDone = TaskStatus.NULL;
-            statusProgress = TaskStatus.NULL;
-            statusNew = TaskStatus.NULL;
-
-        } else if (statusDone.equals(TaskStatus.DONE) && statusNew.equals(TaskStatus.NEW)) {
-            Epic epicModofiedStatus = epic;
-            epicModofiedStatus.setStatus(TaskStatus.IN_PROGRESS);
-            updateEpic(epicModofiedStatus);
-            statusDone = TaskStatus.NULL;
-            statusProgress = TaskStatus.NULL;
-            statusNew = TaskStatus.NULL;
-
-        } else if (statusDone.equals(TaskStatus.DONE)) {
-            Epic epicModofiedStatus = epic;
-            epicModofiedStatus.setStatus(TaskStatus.DONE);
-            updateEpic(epicModofiedStatus);
-            statusDone = TaskStatus.NULL;
-            statusProgress = TaskStatus.NULL;
-            statusNew = TaskStatus.NULL;
-
-        }else {
-            Epic epicModofiedStatus = epic;
-            epicModofiedStatus.setStatus(TaskStatus.NEW);
-            updateEpic(epicModofiedStatus);
-            statusDone = TaskStatus.NULL;
-            statusProgress = TaskStatus.NULL;
-            statusNew = TaskStatus.NULL;
-        }
-
-                }
-
-
-
-    //Проверка и обновление статуса для всех Епиков EPIK
-    private void checkStatusEpik() {
-        TaskStatus statusDone = TaskStatus.NULL;
-        TaskStatus statusProgress = TaskStatus.NULL;
-        TaskStatus statusNew = TaskStatus.NULL;
-        for (Epic epic : epicStorage.values()) {
-            if (epic.getSubTaskId().isEmpty()) {
-                Epic epicModofiedStatus = epic;
-                epicModofiedStatus.setStatus(TaskStatus.NEW);
-                updateEpic(epicModofiedStatus);
-            }else {
-                for (int idSubtaskByEpik : epic.getSubTaskId()) {
-                    SubTask subTask = subTaskStorage.get(idSubtaskByEpik);
-                    TaskStatus status = subTask.getStatus();
-                    if (status.equals(TaskStatus.IN_PROGRESS)) {
-                        statusProgress = TaskStatus.IN_PROGRESS;
-                    } else if (status.equals(TaskStatus.DONE)) {
-                        statusDone = TaskStatus.DONE;
-                    }else {
-                        statusNew = TaskStatus.NEW;
-                    }
-                }
-
-                if (statusProgress.equals(TaskStatus.IN_PROGRESS)) {
-                    Epic epicModofiedStatus = epic;
-                    epicModofiedStatus.setStatus(TaskStatus.IN_PROGRESS);
-                    updateEpic(epicModofiedStatus);
-                    statusDone = TaskStatus.NULL;
-                    statusProgress = TaskStatus.NULL;
-                    statusNew = TaskStatus.NULL;
-
-                } else if (statusDone.equals(TaskStatus.DONE) && statusNew.equals(TaskStatus.NEW)) {
-                    Epic epicModofiedStatus = epic;
-                    epicModofiedStatus.setStatus(TaskStatus.IN_PROGRESS);
-                    updateEpic(epicModofiedStatus);
-                    statusDone = TaskStatus.NULL;
-                    statusProgress = TaskStatus.NULL;
-                    statusNew = TaskStatus.NULL;
-
-                } else if (statusDone.equals(TaskStatus.DONE)) {
-                    Epic epicModofiedStatus = epic;
-                    epicModofiedStatus.setStatus(TaskStatus.DONE);
-                    updateEpic(epicModofiedStatus);
-                    statusDone = TaskStatus.NULL;
-                    statusProgress = TaskStatus.NULL;
-                    statusNew = TaskStatus.NULL;
-
-                }else {
-                    Epic epicModofiedStatus = epic;
-                    epicModofiedStatus.setStatus(TaskStatus.NEW);
-                    updateEpic(epicModofiedStatus);
-                    statusDone = TaskStatus.NULL;
-                    statusProgress = TaskStatus.NULL;
-                    statusNew = TaskStatus.NULL;
-                }
-
-            }
+        if (allSubtaskIsDone) {
+            epic.setStatus(TaskStatus.DONE);
+        } else if (allSubtaskIsNew) {
+            epic.setStatus(TaskStatus.NEW);
+        } else {
+            epic.setStatus(TaskStatus.IN_PROGRESS);
         }
     }
 
