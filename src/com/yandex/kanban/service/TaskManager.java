@@ -2,8 +2,9 @@ package com.yandex.kanban.service;
 
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
-import java.util.List;
 import com.yandex.kanban.model.Task;
+
+import java.util.List;
 
 public interface TaskManager {
 
@@ -37,13 +38,13 @@ public interface TaskManager {
     public void removeAllEpik ();
 
     //Получение задачи по id TASK
-    public Task getByTaskId(int id);
+    public Task getTask(int id);
 
     //Получение подзадачи по id SUBTASK
-    public SubTask getBySubTaskId(int epicId);
+    public SubTask getSubTask(int epicId);
 
     //Получение епика по id EPIK
-    public Epic getByEpikId(int epicId);
+    public Epic getEpik(int epicId);
 
     //Получение всех задач TASK
     public List<Task> getAllTasks();

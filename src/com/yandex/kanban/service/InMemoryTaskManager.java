@@ -67,6 +67,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         taskStorage.remove(id);
+        historyManager.remove(id);
         System.out.println("Задача удалена");
     }
 
@@ -75,6 +76,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeSubTask(Integer id) {
 
         SubTask subTask = subTaskStorage.remove(id);
+        historyManager.remove(subTask.getEpicId());
 
         if(subTask == null) {
             System.out.println("Подзадачи с таким id нет");
@@ -92,6 +94,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpik(int id) {
         Epic epic = epicStorage.remove(id);
+        historyManager.remove(id);
         if(epic == null) {
             System.out.println("Епика с таким id нет");
             return;
@@ -102,21 +105,28 @@ public class InMemoryTaskManager implements TaskManager {
                 continue;
             }
             subTaskStorage.remove(idSubTask);
+            historyManager.remove(idSubTask);
         }
         epic.removeAllSubtaskIds();
-        epicStorage.remove(id);
+       // epicStorage.remove(id);
         System.out.println("Удален Епик и его подзадачи если они были ");
     }
 
     //Удаление всех задач TASK
     @Override
     public void removeAllTask (){
+        for (Task task : taskStorage.values()) {
+            historyManager.remove(task.getId());
+       }
         taskStorage.clear();
     }
 
     //Удаление всех подзадач SUBTASK
     @Override
     public void removeAllSubTask() {
+        for (SubTask subTask: subTaskStorage.values()) {
+            historyManager.remove(subTask.getEpicId());
+        }
         subTaskStorage.clear();
         for (Epic epic : epicStorage.values()) {
             epic.removeAllSubtaskIds();
@@ -129,30 +139,36 @@ public class InMemoryTaskManager implements TaskManager {
     //Удаление всех епик и подзадачи тоже EPIK
     @Override
     public void removeAllEpik (){
+        for (SubTask subTask: subTaskStorage.values()) {
+            historyManager.remove(subTask.getId());
+        }
+        for (Epic epic: epicStorage.values()) {
+            historyManager.remove(epic.getId());
+        }
         subTaskStorage.clear();
         epicStorage.clear();
     }
 
     //Получение задачи по id TASK а так же добавление в историю просмотров
     @Override
-    public Task getByTaskId(int id) {
+    public Task getTask(int id) {
         Task task = taskStorage.get(id);
-        historyManager.addHistory(task);
+        historyManager.add(task);
         return task;
     }
     //Получение подзадачи по id SUBTASK а так же добавление в историю просмотров
     @Override
-    public SubTask getBySubTaskId(int epicId) {
+    public SubTask getSubTask(int epicId) {
         SubTask subTask = subTaskStorage.get(epicId);
-        historyManager.addHistory(subTask);
+        historyManager.add(subTask);
         return subTask;
 
     }
     //Получение епика по id EPIK а так же добавление в историю просмотров
     @Override
-    public Epic getByEpikId(int epicId) {
+    public Epic getEpik(int epicId) {
         Epic epic = epicStorage.get(epicId);
-        historyManager.addHistory(epic);
+        historyManager.add(epic);
         return epic;
     }
 
@@ -200,6 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         taskStorage.put(task.getId(), task);
+        historyManager.add(task);
     }
 
 
@@ -210,10 +227,10 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Integer epicId = epic.getId();
-        Epic values = epicStorage.get(epicId);
-        values.setName(epic.getName());
-        values.setDescription(epic.getDescription());
-
+        Epic newEpic = epicStorage.get(epicId);
+        newEpic.setName(epic.getName());
+        newEpic.setDescription(epic.getDescription());
+        historyManager.add(newEpic);
     }
 
     //Обновление-Перезапись подзадачи с сохранением id для сверщика Епиков
@@ -224,6 +241,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = subTask.getId();
         subTaskStorage.put(id, subTask);
+        historyManager.add(subTask);
         Epic epic = epicStorage.get(subTask.getEpicId());
         checkStatusEpikId(epic);
     }
@@ -231,7 +249,10 @@ public class InMemoryTaskManager implements TaskManager {
     //Проверка и обновление статуса EPIK по id
     private void checkStatusEpikId(Epic epic) {
 
-        if (epic.getSubTaskId().size() == 0) {
+        if (epic == null) {
+            return;
+        }
+        if (epic.getSubTaskId().isEmpty()) {
             epic.setStatus(TaskStatus.NEW);
             return;
         }
@@ -256,11 +277,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         }
-    }
-
-    //Вывод ошибки
-    private void error() {
-        System.out.println("Задачи с этим id нет!");
     }
 
     //Создание id
