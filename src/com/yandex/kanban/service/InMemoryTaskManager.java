@@ -76,13 +76,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeSubTask(Integer id) {
 
         SubTask subTask = subTaskStorage.remove(id);
-        historyManager.remove(subTask.getEpicId());
 
         if(subTask == null) {
             System.out.println("Подзадачи с таким id нет");
             return;
         }
 
+        historyManager.remove(subTask.getEpicId());
         Integer epicId = subTask.getEpicId();
         Epic epic = epicStorage.get(epicId);
         epic.removeIdFromSubtaskIds(id);
@@ -94,13 +94,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpik(int id) {
         Epic epic = epicStorage.remove(id);
-        historyManager.remove(id);
+
         if(epic == null) {
             System.out.println("Епика с таким id нет");
             return;
         }
-        List<Integer> epicId = epic.getSubTaskId();
-        for (Integer idSubTask : epicId) {
+
+        historyManager.remove(id);
+        List<Integer> subTaskIds = epic.getSubTaskId();
+        for (Integer idSubTask : subTaskIds) {
             if(!subTaskStorage.containsKey(idSubTask)) {
                 continue;
             }
@@ -108,7 +110,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.remove(idSubTask);
         }
         epic.removeAllSubtaskIds();
-       // epicStorage.remove(id);
         System.out.println("Удален Епик и его подзадачи если они были ");
     }
 
@@ -208,7 +209,6 @@ public class InMemoryTaskManager implements TaskManager {
         return subTaskByEpik;
     }
 
-
     //Обновление-Перезапись задач с сохранением id
     @Override
     public void updateTask(Task task) {
@@ -218,7 +218,6 @@ public class InMemoryTaskManager implements TaskManager {
         taskStorage.put(task.getId(), task);
         historyManager.add(task);
     }
-
 
     //Обновление-Перезапись Епика с сохранением id
     @Override

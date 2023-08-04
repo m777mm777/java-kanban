@@ -58,5 +58,6 @@ public class Main {
         taskManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
 
         System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+
     }
 }
