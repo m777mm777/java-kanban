@@ -13,13 +13,13 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
 
     //Начальное значение id
-    private int generatedId = 0;
+    protected int generatedId = 0;
 
     //Колекции для хранения задач, епиков и подзадач эпиков
-    private Map<Integer, Task> taskStorage = new HashMap<>();
-    private Map<Integer, Epic> epicStorage = new HashMap<>();
-    private Map<Integer, SubTask> subTaskStorage = new HashMap<>();
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected Map<Integer, Task> taskStorage = new HashMap<>();
+    protected Map<Integer, Epic> epicStorage = new HashMap<>();
+    protected Map<Integer, SubTask> subTaskStorage = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     // Создание задачи TASK
     @Override
@@ -246,7 +246,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Проверка и обновление статуса EPIK по id
-    private void checkStatusEpikId(Epic epic) {
+    protected void checkStatusEpikId(Epic epic) {
 
         if (epic == null) {
             return;
@@ -279,7 +279,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Создание id
-    private int getGenerateId() {
+    protected int getGenerateId() {
         return ++generatedId;
     }
 

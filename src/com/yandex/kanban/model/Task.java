@@ -7,24 +7,32 @@ public class Task {
     protected  String name;
     protected String description;
     protected TaskStatus status;
+    protected TaskTupe tupe;
 
     public Task(String name, String description, TaskStatus status, int id) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.id = id;
+        this.tupe = TaskTupe.TASK;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
+        this.tupe = TaskTupe.TASK;
     }
 
     public Task(String name, String description, int id) {
         this.name = name;
         this.description = description;
         this.id = id;
+        this.tupe = TaskTupe.TASK;
+    }
+
+    public TaskTupe getTupe() {
+        return tupe;
     }
 
     public Integer getId() {

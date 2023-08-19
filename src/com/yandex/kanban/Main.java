@@ -3,6 +3,7 @@ package com.yandex.kanban;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
 
@@ -11,6 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
         TaskManager taskManager = Managers.getDefault();
+        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
         Task task1 = new Task("Задача №1", "Описание задачи №1");
         Task task2 = new Task("Задача №2", "Описание задачи №2");
@@ -55,8 +57,11 @@ public class Main {
 
         System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
-        taskManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
+      //  taskManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
+        taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
+        subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5,3);
+        taskManager.updateSubTask(subTask1);
         System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
     }

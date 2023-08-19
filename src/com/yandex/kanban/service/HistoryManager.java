@@ -9,4 +9,5 @@ public interface HistoryManager {
     void remove(int id);
 
     void add(Task task);
+
 }
