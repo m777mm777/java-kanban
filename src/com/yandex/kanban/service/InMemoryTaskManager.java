@@ -1,25 +1,24 @@
 package com.yandex.kanban.service;
+
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.TaskStatus;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-
 public class InMemoryTaskManager implements TaskManager {
 
     //Начальное значение id
     protected int generatedId = 0;
 
     //Колекции для хранения задач, епиков и подзадач эпиков
-    protected Map<Integer, Task> taskStorage = new HashMap<>();
-    protected Map<Integer, Epic> epicStorage = new HashMap<>();
-    protected Map<Integer, SubTask> subTaskStorage = new HashMap<>();
-    protected final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected static Map<Integer, Task> taskStorage = new HashMap<>();
+    protected static Map<Integer, Epic> epicStorage = new HashMap<>();
+    protected static Map<Integer, SubTask> subTaskStorage = new HashMap<>();
+    protected static final HistoryManager historyManager = Managers.getDefaultHistory();
 
     // Создание задачи TASK
     @Override
@@ -74,14 +73,11 @@ public class InMemoryTaskManager implements TaskManager {
     //Удаление подзадачи по id SUBTASK
     @Override
     public void removeSubTask(Integer id) {
-
         SubTask subTask = subTaskStorage.remove(id);
-
         if(subTask == null) {
             System.out.println("Подзадачи с таким id нет");
             return;
         }
-
         historyManager.remove(subTask.getEpicId());
         Integer epicId = subTask.getEpicId();
         Epic epic = epicStorage.get(epicId);
@@ -94,12 +90,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpik(int id) {
         Epic epic = epicStorage.remove(id);
-
         if(epic == null) {
             System.out.println("Епика с таким id нет");
             return;
         }
-
         historyManager.remove(id);
         List<Integer> subTaskIds = epic.getSubTaskId();
         for (Integer idSubTask : subTaskIds) {
@@ -118,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllTask (){
         for (Task task : taskStorage.values()) {
             historyManager.remove(task.getId());
-       }
+        }
         taskStorage.clear();
     }
 
@@ -133,7 +127,6 @@ public class InMemoryTaskManager implements TaskManager {
             epic.removeAllSubtaskIds();
             checkStatusEpikId(epic);
         }
-
         System.out.println("Все позадачи и их привязка по id к епикам удалены");
     }
 
@@ -157,17 +150,18 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.add(task);
         return task;
     }
+
     //Получение подзадачи по id SUBTASK а так же добавление в историю просмотров
     @Override
     public SubTask getSubTask(int epicId) {
         SubTask subTask = subTaskStorage.get(epicId);
         historyManager.add(subTask);
         return subTask;
-
     }
+
     //Получение епика по id EPIK а так же добавление в историю просмотров
     @Override
-    public Epic getEpik(int epicId) {
+    public Epic getEpic(int epicId) {
         Epic epic = epicStorage.get(epicId);
         historyManager.add(epic);
         return epic;
@@ -178,11 +172,13 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getAllTasks() {
         return new ArrayList<>(taskStorage.values());
     }
+
     //Получение всех епиков EPIK
     @Override
     public List<Task> getAllEpik() {
         return new ArrayList<>(epicStorage.values());
     }
+
     //Получение всех подзадачь из всех эпиков без самих эпиков SUBTASK
     @Override
     public List<Task> getAllSubTask() {
@@ -192,13 +188,10 @@ public class InMemoryTaskManager implements TaskManager {
     //Получение всех подзадач одного Эпика по id Эпика
     @Override
     public List<SubTask> getSubtaskByEpik(int id) {
-
         Epic epic = epicStorage.get(id);
         List<Integer> subTaskIds = epic.getSubTaskId();
         List<SubTask> subTaskByEpik = new ArrayList<>();
-
         for (Integer idBySubTaskByEpik : subTaskIds) {
-
             SubTask subTask = subTaskStorage.get(idBySubTaskByEpik);
             if (subTask == null) {
                 System.out.println("Ошибка, ID подзадачи привязан а подзадачи нет");
@@ -246,8 +239,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Проверка и обновление статуса EPIK по id
-    protected void checkStatusEpikId(Epic epic) {
-
+    protected static void checkStatusEpikId(Epic epic) {
         if (epic == null) {
             return;
         }
@@ -255,7 +247,6 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(TaskStatus.NEW);
             return;
         }
-
         boolean allSubtaskIsNew = true;
         boolean allSubtaskIsDone = true;
 
@@ -286,7 +277,9 @@ public class InMemoryTaskManager implements TaskManager {
     //Получение истории просмотров задач
     @Override
     public List<Task> getHistory() {
-       return historyManager.getHistory();
+        return historyManager.getHistory();
     }
 
 }
+
+

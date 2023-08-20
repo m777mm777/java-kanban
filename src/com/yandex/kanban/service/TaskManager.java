@@ -8,10 +8,8 @@ import java.util.List;
 
 public interface TaskManager {
 
-
     // Создание задачи TASK
     public Task saveTask(Task task);
-
 
     //Создание епика EPIK
     public Epic saveEpic(Epic epic);
@@ -23,6 +21,7 @@ public interface TaskManager {
     public void removeTask(int id);
 
     //Удаление подзадачи по id SUBTASK
+
     public void removeSubTask(Integer id);
 
     //Удаление эпика по id и следовательно всех его подзадач EPIK
@@ -44,7 +43,7 @@ public interface TaskManager {
     public SubTask getSubTask(int epicId);
 
     //Получение епика по id EPIK
-    public Epic getEpik(int epicId);
+    public Epic getEpic(int epicId);
 
     //Получение всех задач TASK
     public List<Task> getAllTasks();
@@ -68,4 +67,5 @@ public interface TaskManager {
     public void updateSubTask(SubTask subTask);
 
     public List<Task> getHistory();
+
 }

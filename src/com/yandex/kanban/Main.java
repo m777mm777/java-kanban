@@ -39,10 +39,10 @@ public class Main {
         taskManager.getTask(1);//Получение задачи должно отразится в истории
         taskManager.getTask(2);//Получение задачи должно отразится в истории
 
-        taskManager.getEpik(3);//Получение Епика должно отразится в истории
-        taskManager.getEpik(4);//Получение Епика должно отразится в истории
-        taskManager.getEpik(3);//Получение Епика должно отразится в истории
-        taskManager.getEpik(4);//Получение Епика должно отразится в истории
+        taskManager.getEpic(3);//Получение Епика должно отразится в истории
+        taskManager.getEpic(4);//Получение Епика должно отразится в истории
+        taskManager.getEpic(3);//Получение Епика должно отразится в истории
+        taskManager.getEpic(4);//Получение Епика должно отразится в истории
 
         taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
         taskManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
@@ -57,12 +57,13 @@ public class Main {
 
         System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
-      //  taskManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
         taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
         subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5,3);
-        taskManager.updateSubTask(subTask1);
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
+        taskManager.updateSubTask(subTask1);
+
+        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
     }
+
 }

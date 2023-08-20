@@ -1,7 +1,7 @@
 package com.yandex.kanban.model;
 
-public enum TaskTupe {
+public enum TaskType {
     TASK,
-    EPIK,
+    EPIC,
     SUBTASK
 }

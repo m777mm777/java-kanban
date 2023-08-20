@@ -4,36 +4,31 @@ import java.util.Objects;
 
 public class Task {
     protected int id;
-    protected  String name;
+    protected String name;
     protected String description;
     protected TaskStatus status;
-    protected TaskTupe tupe;
 
     public Task(String name, String description, TaskStatus status, int id) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.id = id;
-        this.tupe = TaskTupe.TASK;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
-        this.tupe = TaskTupe.TASK;
     }
 
     public Task(String name, String description, int id) {
         this.name = name;
         this.description = description;
+        this.status = status;
         this.id = id;
-        this.tupe = TaskTupe.TASK;
     }
 
-    public TaskTupe getTupe() {
-        return tupe;
-    }
+    public TaskType getType() { return TaskType.TASK; }
 
     public Integer getId() {
         return id;
@@ -92,4 +87,5 @@ public class Task {
     public int hashCode() {
         return Objects.hash(id, name, description, status);
     }
+
 }

@@ -3,20 +3,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-
     private List<Integer> subTaskIds = new ArrayList<>();
-
 
     public Epic(String name, String description) {
         super(name, description);
-        this.tupe = TaskTupe.EPIK;
+    }
+
+    public Epic(String name, String description, TaskStatus status, int id) {
+        super(name, description, status, id);
     }
 
     public Epic(String name, String description, int id) {
-
         super(name, description, id);
-        this.tupe = TaskTupe.EPIK;
     }
+
+    @Override
+    public TaskType getType() { return TaskType.EPIC; }
 
     public List<Integer> getSubTaskId() {
         return subTaskIds;
@@ -44,4 +46,5 @@ public class Epic extends Task {
                 ", subTaskIds='" + subTaskIds + '\'' +
                 '}';
     }
+
 }

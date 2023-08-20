@@ -2,7 +2,6 @@ package com.yandex.kanban.service.file;
 
 import com.yandex.kanban.model.*;
 import com.yandex.kanban.service.HistoryManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +11,12 @@ public class CSVFormatHandler {
 //Из задачи в строку для записи
     String toString(Task task) {
         String result = task.getId() + DELIMITER
-                + task.getTupe() + DELIMITER
+                + task.getType() + DELIMITER
                 + task.getName() + DELIMITER
                 + task.getStatus() + DELIMITER
                 + task.getDescription() + DELIMITER;
-        if (task.getTupe() == TaskTupe.SUBTASK) {
-             result = result + ((SubTask) task).getEpicId();
+        if (task.getType() == TaskType.SUBTASK) {
+            result = result + ((SubTask) task).getEpicId();
         }
         return result;
     }
@@ -26,21 +25,21 @@ public class CSVFormatHandler {
     Task fromString(String line) {
         String[] parts = line.split(",");
         int id = Integer.parseInt(parts[0]);
-        TaskTupe tupe = TaskTupe.valueOf(parts[1]);
+        TaskType tupe = TaskType.valueOf(parts[1]);
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
 
-        if (tupe == TaskTupe.EPIK) {
-            Epic epic = new Epic(name, description, id);
+        if (tupe == TaskType.EPIC) {
+            Epic epic = new Epic(name, description, status, id);
             return epic;
-        } else if (tupe == TaskTupe.SUBTASK) {
+        } else if (tupe == TaskType.SUBTASK) {
             int epikId = Integer.parseInt(parts[5]);
             SubTask subTask = new SubTask(name, description, status, id, epikId);
             return subTask;
         }else {
-                Task task = new Task(name, description, status, id);
-                return task;
+            Task task = new Task(name, description, status, id);
+            return task;
         }
     }
 
@@ -70,3 +69,4 @@ public class CSVFormatHandler {
     }
 
 }
+
