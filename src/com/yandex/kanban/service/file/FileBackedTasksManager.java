@@ -11,71 +11,69 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
     private final static CSVFormatHandler handler = new CSVFormatHandler();
 
-    public FileBackedTasksManager(String fileName) {
-        this.file = new File(fileName);
-    }
-
-    File getFile() {
-        return file;
+    public FileBackedTasksManager(File file) {
+        this.file = file;
     }
 
     public static void main(String[] args) {
 
-        FileBackedTasksManager taskManager = new FileBackedTasksManager("src/data/data.csv");
+        File file = new File("src/data/data.csv");
+        FileBackedTasksManager fileBackedManager = loadFromFile(file);
 
-        taskManager.loadFromFile(new File(String.valueOf(taskManager.getFile())));
-
-        System.out.println(taskManager.getEpic(4));
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+        System.out.println("История просмотров задач " + fileBackedManager.getHistory());//Печать истории
 
         Task task1 = new Task("Задача №1", "Описание задачи №1");
         Task task2 = new Task("Задача №2", "Описание задачи №2");
 
-        taskManager.saveTask(task1); //Создание задачи
-        taskManager.saveTask(task2); //Создание задачи
+        fileBackedManager.saveTask(task1); //Создание задачи
+        fileBackedManager.saveTask(task2); //Создание задачи
 
         Epic epic1 = new Epic("Эпик №1", "Описание эпика №1");
         Epic epic2 = new Epic("Эпик №2", "Описание эпика №2");
 
-        taskManager.saveEpic(epic1); //Создание Епика
-        taskManager.saveEpic(epic2); //Создание Епика
+        fileBackedManager.saveEpic(epic1); //Создание Епика
+        fileBackedManager.saveEpic(epic2); //Создание Епика
 
         SubTask subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", 4);
         SubTask subTask2 = new SubTask("Подзадача №2", "Описание Подзадачи №2", 3);
         SubTask subTask3 = new SubTask("Подзадача №3", "Описание Подзадачи №3", 3);
 
-        taskManager.saveSubTask(subTask1); //Создание подзадачи и присвоение ее конкретному Епику
-        taskManager.saveSubTask(subTask2); //Создание подзадачи и присвоение ее конкретному Епику
-        taskManager.saveSubTask(subTask3); //Создание подзадачи и присвоение ее конкретному Епику
+        fileBackedManager.saveSubTask(subTask1); //Создание подзадачи и присвоение ее конкретному Епику
+        fileBackedManager.saveSubTask(subTask2); //Создание подзадачи и присвоение ее конкретному Епику
+        fileBackedManager.saveSubTask(subTask3); //Создание подзадачи и присвоение ее конкретному Епику
 
-        taskManager.getTask(1);//Получение задачи должно отразится в истории
-        taskManager.getTask(2);//Получение задачи должно отразится в истории
-        taskManager.getTask(1);//Получение задачи должно отразится в истории
-        taskManager.getTask(2);//Получение задачи должно отразится в истории
-        taskManager.getEpic(3);//Получение Епика должно отразится в истории
-        taskManager.getEpic(4);//Получение Епика должно отразится в истории
-        taskManager.getEpic(3);//Получение Епика должно отразится в истории
-        taskManager.getEpic(4);//Получение Епика должно отразится в истории
+        fileBackedManager.getTask(1);//Получение задачи должно отразится в истории
+        fileBackedManager.getTask(2);//Получение задачи должно отразится в истории
+        fileBackedManager.getTask(1);//Получение задачи должно отразится в истории
+        fileBackedManager.getTask(2);//Получение задачи должно отразится в истории
+        fileBackedManager.getEpic(3);//Получение Епика должно отразится в истории
+        fileBackedManager.getEpic(4);//Получение Епика должно отразится в истории
+        fileBackedManager.getEpic(3);//Получение Епика должно отразится в истории
+        fileBackedManager.getEpic(4);//Получение Епика должно отразится в истории
 
-        taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
-        taskManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
-        taskManager.getSubTask(7);//Получение Подзадачи должно отразится в истории
-        taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
-        taskManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
-        taskManager.getSubTask(7);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(7);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.getSubTask(7);//Получение Подзадачи должно отразится в истории
 
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+        fileBackedManager.removeTask(1);//Удаление задачи 1 и из истории
 
-        taskManager.removeTask(1);//Удаление задачи 1 и из истории
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
-
-        taskManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
-        taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
+        fileBackedManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
+        fileBackedManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
         subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5,4);
-        taskManager.updateSubTask(subTask1);
+        fileBackedManager.updateSubTask(subTask1);
 
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+        FileBackedTasksManager loadFromfFile = FileBackedTasksManager.loadFromFile(file);
+
+        System.out.println("История просмотров задач " + fileBackedManager.getHistory());//Печать истории
+        System.out.println("Проверка задач: " + loadFromfFile.taskStorage.equals(fileBackedManager.taskStorage));
+        System.out.println("Проверка епиков: " + loadFromfFile.epicStorage.equals(fileBackedManager.epicStorage));
+        System.out.println("Проверка подзадач " + loadFromfFile.subTaskStorage.equals(fileBackedManager.subTaskStorage));
+
+
     }
 
     //Сохранение прогресса менеджера в CSV
@@ -107,7 +105,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    public static FileBackedTasksManager loadFromFile (File file) {
+    public static FileBackedTasksManager loadFromFile(File file) {
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             boolean isNextHistory = false;
             String line = bufferedReader.readLine();
@@ -121,50 +120,37 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         if (line.equals(handler.getHeader())) {
                             continue;
                         }
-
                         if (!isNextHistory) {
                             Task task = handler.fromString(line);
 
                             switch (task.getType()) {
                                 case EPIC:
                                     Epic epic = (Epic) task;
-                                    epicStorage.put(epic.getId(), epic);
+                                    fileBackedTasksManager.epicStorage.put(epic.getId(), epic);
                                     break;
                                 case SUBTASK:
                                     SubTask subTask = (SubTask) task;
-                                    subTaskStorage.put(subTask.getId(), subTask);
-                                    Epic epicValue = epicStorage.get(subTask.getEpicId());
+                                    fileBackedTasksManager.subTaskStorage.put(subTask.getId(), subTask);
+                                    Epic epicValue = fileBackedTasksManager.epicStorage.get(subTask.getEpicId());
                                     epicValue.addSubtaskIds(subTask.getId());
                                     break;
                                 case TASK:
-                                    taskStorage.put(task.getId(), task);
+                                    fileBackedTasksManager.taskStorage.put(task.getId(), task);
                                     break;
                             }
                         } else {
                             List<Integer> idHistory = handler.historyFromString(line);
-
-                            for (int id : idHistory) {
-                                if (taskStorage.containsKey(id)) {
-                                    historyManager.add(taskStorage.get(id));
-                                } else if (subTaskStorage.containsKey(id)) {
-                                    historyManager.add(subTaskStorage.get(id));
-                                } else if (epicStorage.containsKey(id)) {
-                                    historyManager.add(epicStorage.get(id));
-                                }
-                            }
+                            fileBackedTasksManager.loadHistory(idHistory);
                         }
                     } else {
                         isNextHistory = true;
                     }
                 }
             }
+            return fileBackedTasksManager;
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось считать данные из файла.");
         }
-        for(Epic epic: epicStorage.values()) {
-            checkStatusEpikId(epic);
-        }
-        return new FileBackedTasksManager("src/data/data.csv");
     }
 
     // Создание задачи TASK

@@ -15,10 +15,22 @@ public class InMemoryTaskManager implements TaskManager {
     protected int generatedId = 0;
 
     //Колекции для хранения задач, епиков и подзадач эпиков
-    protected static Map<Integer, Task> taskStorage = new HashMap<>();
-    protected static Map<Integer, Epic> epicStorage = new HashMap<>();
-    protected static Map<Integer, SubTask> subTaskStorage = new HashMap<>();
-    protected static final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected Map<Integer, Task> taskStorage = new HashMap<>();
+    protected Map<Integer, Epic> epicStorage = new HashMap<>();
+    protected Map<Integer, SubTask> subTaskStorage = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
+
+    public void loadHistory(List<Integer> idHistory) {
+        for (int id : idHistory) {
+            if (taskStorage.containsKey(id)) {
+                historyManager.add(taskStorage.get(id));
+            } else if (subTaskStorage.containsKey(id)) {
+                historyManager.add(subTaskStorage.get(id));
+            } else if (epicStorage.containsKey(id)) {
+                historyManager.add(epicStorage.get(id));
+            }
+        }
+    }
 
     // Создание задачи TASK
     @Override
@@ -239,7 +251,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Проверка и обновление статуса EPIK по id
-    protected static void checkStatusEpikId(Epic epic) {
+    protected void checkStatusEpikId(Epic epic) {
         if (epic == null) {
             return;
         }
