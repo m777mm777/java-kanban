@@ -1,14 +1,12 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
+import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
+
 public class InMemoryTaskManager implements TaskManager {
 
     //Начальное значение id
@@ -18,8 +16,51 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> taskStorage = new HashMap<>();
     protected Map<Integer, Epic> epicStorage = new HashMap<>();
     protected Map<Integer, SubTask> subTaskStorage = new HashMap<>();
+    private final Comparator<Task> taskComparator = Comparator.comparing(Task::getStartDateTime);
+    protected Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
+    private void prioritizedTask(Task task) {
+        prioritizedTasks.add(task);
+        validate();
+    }
+
+    //проверка пересечения времени
+    private boolean checkTimeIntersection(Task task) {
+        List<Task> tasks = List.copyOf(prioritizedTasks);
+        if (tasks.size() > 0) {
+            for (Task taskPrioritized : tasks) {
+                    if (task.getStartDateTime().isBefore(taskPrioritized.getStartDateTime())
+                            && !task.getEndDateTime().isBefore(taskPrioritized.getStartDateTime())) {
+                        return true;
+                    } else if (task.getStartDateTime().isAfter(taskPrioritized.getStartDateTime())
+                            && task.getEndDateTime().isBefore(taskPrioritized.getStartDateTime())) {
+                        return true;
+                    }
+            }
+        } else {
+            return false;
+        }
+        return false;
+    }
+
+    //Проверка пересечения задачи
+    private void validate() {
+        Set<Task> tasks = getPrioritizedTasks();
+            for (Task task: tasks) {
+            if (checkTimeIntersection(task)) {
+                throw new TaskValidateException("Задачи пересекаются");
+            }
+        }
+    }
+
+    //Получение списка задачь по приоритетности
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
+    }
+
+    //Восстановление истории просмотров
     public void loadHistory(List<Integer> idHistory) {
         for (int id : idHistory) {
             if (taskStorage.containsKey(id)) {
@@ -38,6 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = getGenerateId();
         task.setId(id);
         taskStorage.put(id, task);
+        prioritizedTask(task);
         return task;
     }
 
@@ -63,6 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
             subTaskStorage.put(id, subTask);
             epic.addSubtaskIds(id);
             checkStatusEpikId(epic);
+            prioritizedTask(subTask);
             return subTask;
         }else {
             System.out.println("Нет такого эпика");
@@ -77,8 +120,9 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Задачи с таким id нет");
             return;
         }
-        taskStorage.remove(id);
+        Task task = taskStorage.remove(id);
         historyManager.remove(id);
+        prioritizedTasks.remove(task);
         System.out.println("Задача удалена");
     }
 
@@ -95,12 +139,13 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicStorage.get(epicId);
         epic.removeIdFromSubtaskIds(id);
         checkStatusEpikId(epic);
+        prioritizedTasks.remove(subTask);
         System.out.println("Подзадача и ее привязка к эпику удалена");
     }
 
-    //Удаление эпика по id и следовательно всех его подзадач EPIK
+    //Удаление эпика по id и следовательно всех его подзадач EPIC
     @Override
-    public void removeEpik(int id) {
+    public void removeEpic(int id) {
         Epic epic = epicStorage.remove(id);
         if(epic == null) {
             System.out.println("Епика с таким id нет");
@@ -112,8 +157,9 @@ public class InMemoryTaskManager implements TaskManager {
             if(!subTaskStorage.containsKey(idSubTask)) {
                 continue;
             }
-            subTaskStorage.remove(idSubTask);
+            SubTask subTask = subTaskStorage.remove(idSubTask);
             historyManager.remove(idSubTask);
+            prioritizedTasks.remove(subTask);
         }
         epic.removeAllSubtaskIds();
         System.out.println("Удален Епик и его подзадачи если они были ");
@@ -124,6 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllTask (){
         for (Task task : taskStorage.values()) {
             historyManager.remove(task.getId());
+            prioritizedTasks.remove(taskStorage.get(task.getId()));
         }
         taskStorage.clear();
     }
@@ -133,6 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubTask() {
         for (SubTask subTask: subTaskStorage.values()) {
             historyManager.remove(subTask.getEpicId());
+            prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
         }
         subTaskStorage.clear();
         for (Epic epic : epicStorage.values()) {
@@ -144,9 +192,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Удаление всех епик и подзадачи тоже EPIK
     @Override
-    public void removeAllEpik (){
+    public void removeAllEpic(){
         for (SubTask subTask: subTaskStorage.values()) {
             historyManager.remove(subTask.getId());
+            prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
         }
         for (Epic epic: epicStorage.values()) {
             historyManager.remove(epic.getId());
@@ -187,7 +236,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Получение всех епиков EPIK
     @Override
-    public List<Task> getAllEpik() {
+    public List<Task> getAllEpic() {
         return new ArrayList<>(epicStorage.values());
     }
 
@@ -220,8 +269,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return;
         }
+        prioritizedTasks.remove(taskStorage.get(task.getId()));
         taskStorage.put(task.getId(), task);
         historyManager.add(task);
+        prioritizedTask(task);
     }
 
     //Обновление-Перезапись Епика с сохранением id
@@ -244,8 +295,10 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         int id = subTask.getId();
+        prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
         subTaskStorage.put(id, subTask);
         historyManager.add(subTask);
+        prioritizedTask(subTask);
         Epic epic = epicStorage.get(subTask.getEpicId());
         checkStatusEpikId(epic);
     }

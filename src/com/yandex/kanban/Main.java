@@ -7,6 +7,8 @@ import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
 
+import java.time.LocalDateTime;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -59,11 +61,14 @@ public class Main {
 
         taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
-        subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5,3);
+        subTask1 = new SubTask(
+                "Подзадача №1",
+                "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5, LocalDateTime.now(),1,3);
 
         taskManager.updateSubTask(subTask1);
 
         System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+
     }
 
 }

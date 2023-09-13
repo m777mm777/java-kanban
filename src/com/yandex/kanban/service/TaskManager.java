@@ -5,9 +5,12 @@ import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
 
+    //Возврат коллекции задач по приоритету
+    public Set<Task> getPrioritizedTasks();
     // Создание задачи TASK
     public Task saveTask(Task task);
 
@@ -25,16 +28,16 @@ public interface TaskManager {
     public void removeSubTask(Integer id);
 
     //Удаление эпика по id и следовательно всех его подзадач EPIK
-    public void removeEpik(int id);
+    public void removeEpic(int id);
 
     //Удаление всех задач TASK
-    public void removeAllTask ();
+    public void removeAllTask();
 
     //Удаление всех подзадач SUBTASK
     public void removeAllSubTask();
 
     //Удаление всех епик и подзадачи тоже EPIK
-    public void removeAllEpik ();
+    public void removeAllEpic();
 
     //Получение задачи по id TASK
     public Task getTask(int id);
@@ -49,7 +52,7 @@ public interface TaskManager {
     public List<Task> getAllTasks();
 
     //Получение всех епиков EPIK
-    public List<Task> getAllEpik();
+    public List<Task> getAllEpic();
 
     //Получение всех подзадачь из всех эпиков без самих эпиков SUBTASK
     public List<Task> getAllSubTask();

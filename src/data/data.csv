@@ -1,6 +1,6 @@
-id,type,name,status,description,epic
-2,TASK,Задача №2,NEW,Описание задачи №2,
-4,EPIC,Эпик №2,IN_PROGRESS,Описание эпика №2,
-5,SUBTASK,Подзадача №1,IN_PROGRESS,Описание Подзадачи №1,4
+id,type,name,status,description,startDataTime,duration,epic
+2,TASK,Задача №2,NEW,Описание задачи №2,2023-09-13T06:15:24.909786,1,
+4,EPIC,Эпик №2,IN_PROGRESS,Описание эпика №2,2023-09-13T06:15:25.081397,1,
+5,SUBTASK,Подзадача №1,IN_PROGRESS,Описание Подзадачи №1,2023-09-13T06:15:25.117414,1,4
 
 2,4,5

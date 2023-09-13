@@ -2,6 +2,8 @@ package com.yandex.kanban.service.file;
 
 import com.yandex.kanban.model.*;
 import com.yandex.kanban.service.HistoryManager;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +16,13 @@ public class CSVFormatHandler {
                 + task.getType() + DELIMITER
                 + task.getName() + DELIMITER
                 + task.getStatus() + DELIMITER
-                + task.getDescription() + DELIMITER;
+                + task.getDescription() + DELIMITER
+                + task.getStartDateTime() + DELIMITER
+                + task.getDuration() + DELIMITER;
         if (task.getType() == TaskType.SUBTASK) {
             result = result + ((SubTask) task).getEpicId();
         }
+
         return result;
     }
 
@@ -29,16 +34,24 @@ public class CSVFormatHandler {
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
+        LocalDateTime startDateTime;
+        Integer duration;
 
         if (tupe == TaskType.EPIC) {
-            Epic epic = new Epic(name, description, status, id);
+            startDateTime = LocalDateTime.parse(parts[5]);
+            duration = Integer.valueOf(parts[6]);
+            Epic epic = new Epic(name, description, status, id, startDateTime, duration);
             return epic;
         } else if (tupe == TaskType.SUBTASK) {
-            int epikId = Integer.parseInt(parts[5]);
-            SubTask subTask = new SubTask(name, description, status, id, epikId);
+            int epikId = Integer.parseInt(parts[7]);
+            startDateTime = LocalDateTime.parse(parts[5]);
+            duration = Integer.valueOf(parts[6]);
+            SubTask subTask = new SubTask(name, description, status, id, startDateTime, duration, epikId);
             return subTask;
         }else {
-            Task task = new Task(name, description, status, id);
+            startDateTime = LocalDateTime.parse(parts[5]);
+            duration = Integer.valueOf(parts[6]);
+            Task task = new Task(name, description, status, id, startDateTime, duration);
             return task;
         }
     }
@@ -65,7 +78,7 @@ public class CSVFormatHandler {
 
 //Шапка CSV файла
     String getHeader() {
-        return "id,type,name,status,description,epic";
+        return "id,type,name,status,description,startDataTime,duration,epic";
     }
 
 }

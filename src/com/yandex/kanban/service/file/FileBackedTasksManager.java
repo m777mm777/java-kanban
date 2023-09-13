@@ -4,6 +4,7 @@ import com.yandex.kanban.model.*;
 import com.yandex.kanban.service.InMemoryTaskManager;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -60,10 +61,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         fileBackedManager.removeTask(1);//Удаление задачи 1 и из истории
 
-        fileBackedManager.removeEpik(3);//Удаление Епика и его Подзадач так же из истории
+        fileBackedManager.removeEpic(3);//Удаление Епика и его Подзадач так же из истории
         fileBackedManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
-        subTask1 = new SubTask("Подзадача №1", "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5,4);
+        subTask1 = new SubTask(
+                "Подзадача №1",
+                "Описание Подзадачи №1",
+                TaskStatus.IN_PROGRESS, 5, LocalDateTime.now(),1,4);
         fileBackedManager.updateSubTask(subTask1);
 
         FileBackedTasksManager loadFromfFile = FileBackedTasksManager.loadFromFile(file);
@@ -73,6 +77,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Проверка епиков: " + loadFromfFile.epicStorage.equals(fileBackedManager.epicStorage));
         System.out.println("Проверка подзадач " + loadFromfFile.subTaskStorage.equals(fileBackedManager.subTaskStorage));
 
+        System.out.println(fileBackedManager.getPrioritizedTasks());
 
     }
 
@@ -193,8 +198,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     //Удаление эпика по id и следовательно всех его подзадач EPIK
     @Override
-    public void removeEpik(int id) {
-        super.removeEpik(id);
+    public void removeEpic(int id) {
+        super.removeEpic(id);
         save();
     }
 
@@ -214,8 +219,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     //Удаление всех епик и подзадачи тоже EPIK
     @Override
-    public void removeAllEpik() {
-        super.removeAllEpik();
+    public void removeAllEpic() {
+        super.removeAllEpic();
         save();
     }
 

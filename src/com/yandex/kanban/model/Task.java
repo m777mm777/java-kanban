@@ -1,5 +1,6 @@
 package com.yandex.kanban.model;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -7,25 +8,33 @@ public class Task {
     protected String name;
     protected String description;
     protected TaskStatus status;
+    protected LocalDateTime startDateTime;
+    protected Integer duration;
 
-    public Task(String name, String description, TaskStatus status, int id) {
+    public Task(String name, String description, TaskStatus status, int id, LocalDateTime time, Integer minutes) {
         this.name = name;
         this.description = description;
         this.status = status;
         this.id = id;
+        this.startDateTime = time;
+        this.duration = minutes;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
+        this.startDateTime = LocalDateTime.now();
+        this.duration = 0;
     }
 
-    public Task(String name, String description, int id) {
+    public Task(String name, String description, int id, LocalDateTime time, Integer minutes) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
         this.id = id;
+        this.startDateTime = time;
+        this.duration = minutes;
     }
 
     public TaskType getType() { return TaskType.TASK; }
@@ -62,6 +71,18 @@ public class Task {
         this.status = status;
     }
 
+    public LocalDateTime getStartDateTime() {
+        return startDateTime;
+    }
+
+    public LocalDateTime getEndDateTime() {
+        return startDateTime.plusMinutes(duration);
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -69,6 +90,8 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
+                ", startDateTime='" + startDateTime + '\'' +
+                ", duration='" + duration + '\'' +
                 '}';
     }
 
@@ -80,12 +103,14 @@ public class Task {
         return Objects.equals(id, task.id)
                 && Objects.equals(name, task.name)
                 && Objects.equals(description, task.description)
-                && Objects.equals(status, task.status);
+                && Objects.equals(status, task.status)
+                && Objects.equals(startDateTime, task.startDateTime)
+                && Objects.equals(duration, task.duration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, status);
+        return Objects.hash(id, name, description, status, startDateTime, duration);
     }
 
 }
