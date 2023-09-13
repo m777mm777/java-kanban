@@ -77,7 +77,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Проверка епиков: " + loadFromfFile.epicStorage.equals(fileBackedManager.epicStorage));
         System.out.println("Проверка подзадач " + loadFromfFile.subTaskStorage.equals(fileBackedManager.subTaskStorage));
 
-        System.out.println(fileBackedManager.getPrioritizedTasks());
+        Task task23 = new Task("Задача №1", "Описание задачи №1");
+
+
+        fileBackedManager.saveTask(task23); //Создание задачи
+        System.out.println("приоритет лист" + fileBackedManager.getPrioritizedTasks());
 
     }
 
@@ -107,6 +111,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         } catch (IOException e) {
             throw new ManagerSaveException("Не удается прочитать файл для записи");
+        }
+    }
+
+    //Восстановление истории просмотров
+    private void loadHistory(List<Integer> idHistory) {
+        for (int id : idHistory) {
+            if (taskStorage.containsKey(id)) {
+                historyManager.add(taskStorage.get(id));
+            } else if (subTaskStorage.containsKey(id)) {
+                historyManager.add(subTaskStorage.get(id));
+            } else if (epicStorage.containsKey(id)) {
+                historyManager.add(epicStorage.get(id));
+            }
         }
     }
 

@@ -25,30 +25,43 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.saveTask(task);
         Task task2 = new Task("Задача №2", "Описание задачи №2");
         taskManager.saveTask(task2);
+
         Task newTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1",1,
+                LocalDateTime.of(2030, 1, 1, 1, 1 ),0);
         Task newTask2 = new Task(
                 "Задача №2",
-                "Описание задачи №2",2, taskManager.getTask(2).getStartDateTime(),1);
+                "Описание задачи №2",2,
+                LocalDateTime.of(2030, 1, 1, 1, 2 ),0);
         Comparator<Task> taskComparatorTest = Comparator.comparing(Task::getStartDateTime);
-        Set<Task> prioritizedTasks = new TreeSet<>(taskComparatorTest);
-        prioritizedTasks.add(newTask);
-        prioritizedTasks.add(newTask2);
+        Set<Task> prioritizedTasksTest = new TreeSet<>(taskComparatorTest);
+        prioritizedTasksTest.add(newTask);
+        prioritizedTasksTest.add(newTask2);
         taskManager.getPrioritizedTasks();
-        Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasks);
+        Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasksTest);
 
         task = new Task("Задача №1",
                 "Описание задачи №1",1,
-                LocalDateTime.now().plusDays(5),30);
+                LocalDateTime.of(2000, 1, 1, 1, 2 ),30);
         taskManager.updateTask(task);
-        prioritizedTasks.clear();
+        task2 = new Task("Задача №2",
+                "Описание задачи №2",2,
+                LocalDateTime.of(2000, 1, 1, 1, 1 ),30);
+        taskManager.updateTask(task2);
+
+        prioritizedTasksTest.clear();
         newTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),30);
-        prioritizedTasks.add(newTask2);
-        prioritizedTasks.add(newTask);
-        Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasks);
+                "Описание задачи №1",1,
+                LocalDateTime.of(2000, 1, 1, 1, 2 ),30);
+        newTask2 = new Task(
+                "Задача №2",
+                "Описание задачи №2",2,
+                LocalDateTime.of(2000, 1, 1, 1, 1 ),30);
+        prioritizedTasksTest.add(newTask2);
+        prioritizedTasksTest.add(newTask);
+        Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasksTest);
     }
 
     //Проверка сохранения истории просмотров
@@ -59,7 +72,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.getTask(1);
         Task newTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),0);
         Assertions.assertEquals(taskManager.getHistory().get(0),newTask);
     }
 
@@ -70,7 +83,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.saveTask(task);
         Task newTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),0);
         Assertions.assertEquals(taskManager.getTask(1),newTask);
     }
 
@@ -85,7 +98,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
                 = new SubTask(
                         "Подзадача №1",
                 "Описание Подзадачи №1",
-                TaskStatus.NEW,2, taskManager.getSubTask(2).getStartDateTime(),1,1);
+                TaskStatus.NEW,2, taskManager.getSubTask(2).getStartDateTime(),0,1);
         Assertions.assertEquals(taskManager.getSubTask(2),currentSubTask);
     }
 
@@ -94,7 +107,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
     public void creatingEpicShouldAppearInTheEpicList() {
         Epic epic = new Epic("Эпик №1", "Описание Эпика №1");
         taskManager.saveEpic(epic);
-        Epic currentEpic = new Epic("Эпик №1", "Описание Эпика №1",1, taskManager.getEpic(1).getStartDateTime(),1);
+        Epic currentEpic = new Epic("Эпик №1", "Описание Эпика №1",1, taskManager.getEpic(1).getStartDateTime(),0);
         Assertions.assertEquals(taskManager.getEpic(1),currentEpic);
     }
 
@@ -107,7 +120,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
                 "Задача №1",
                 "Описание задачи №1",
                 TaskStatus.IN_PROGRESS, 1,
-                LocalDateTime.now(),1);
+                LocalDateTime.now(),0);
         taskManager.updateTask(task);
         Assertions.assertEquals(taskManager.getTask(1).getStatus(),TaskStatus.IN_PROGRESS);
     }
@@ -301,7 +314,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.saveTask(task);
         Task currentTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",TaskStatus.NEW,1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1",TaskStatus.NEW,1, taskManager.getTask(1).getStartDateTime(),0);
         Assertions.assertEquals(taskManager.getTask(1), currentTask);
     }
 
@@ -311,7 +324,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         Epic epic = new Epic("Эпик №1", "Описание Эпика №1");
         taskManager.saveEpic(epic);
         Epic currentEpic = new Epic(
-                "Эпик №1", "Описание Эпика №1",TaskStatus.NEW,1, taskManager.getEpic(1).getStartDateTime(),1);
+                "Эпик №1", "Описание Эпика №1",TaskStatus.NEW,1, taskManager.getEpic(1).getStartDateTime(),0);
         Assertions.assertEquals(taskManager.getEpic(1), currentEpic);
     }
 
@@ -326,7 +339,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
                 = new SubTask(
                         "Подзадача №1",
                 "Описание Подзадачи №1",
-                TaskStatus.NEW,2,  taskManager.getSubTask(2).getStartDateTime(),1,1);
+                TaskStatus.NEW,2,  taskManager.getSubTask(2).getStartDateTime(),0,1);
         Assertions.assertEquals(taskManager.getSubTask(2), currentSubtask);
     }
 
@@ -365,10 +378,10 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.saveTask(task2);
         Task currentTask = new Task(
                 "Задача №1",
-                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1",1, taskManager.getTask(1).getStartDateTime(),0);
         Task currentTask2 = new Task(
                 "Задача №2",
-                "Описание задачи №2",2,  taskManager.getTask(2).getStartDateTime(),1);
+                "Описание задачи №2",2,  taskManager.getTask(2).getStartDateTime(),0);
         List<Task> collectionTask = new ArrayList<>();
         collectionTask.add(currentTask);
         collectionTask.add(currentTask2);
@@ -389,12 +402,12 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
                 = new SubTask(
                         "Подзадача №1",
                 "Описание Подзадачи №1",
-                TaskStatus.NEW,2,  taskManager.getSubTask(2).getStartDateTime(),1,1);
+                TaskStatus.NEW,2,  taskManager.getSubTask(2).getStartDateTime(),0,1);
         SubTask currentSubtask2
                 = new SubTask(
                         "Подзадача №2",
                 "Описание Подзадача №2",
-                TaskStatus.NEW,3, taskManager.getSubTask(3).getStartDateTime(),1,1);
+                TaskStatus.NEW,3, taskManager.getSubTask(3).getStartDateTime(),0,1);
         List<Task> collectionSubTask = new ArrayList<>();
         collectionSubTask.add(currentSubTask);
         collectionSubTask.add(currentSubtask2);
@@ -409,9 +422,9 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         Epic epic2 = new Epic("Эпик №2", "Описание эпика №2");
         taskManager.saveEpic(epic2);
         Epic currentEpic = new Epic("Эпик №1",
-                "Описание эпика №1",1, taskManager.getEpic(1).getStartDateTime(),1);
+                "Описание эпика №1",1, taskManager.getEpic(1).getStartDateTime(),0);
         Epic currentEpic2 = new Epic("Эпик №2",
-                "Описание эпика №2",2, taskManager.getEpic(2).getStartDateTime(),1);
+                "Описание эпика №2",2, taskManager.getEpic(2).getStartDateTime(),0);
         List<Task> collectionEpic = new ArrayList<>();
         collectionEpic.add(currentEpic);
         collectionEpic.add(currentEpic2);
@@ -430,11 +443,11 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         SubTask currentSubTask
                 = new SubTask("Подзадача №1",
                 "Описание Подзадачи №1",
-                TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),1,1);
+                TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),0,1);
         SubTask currentSubtask2
                 = new SubTask("Подзадача №2",
                 "Описание Подзадача №2",
-                TaskStatus.NEW, 3, taskManager.getSubTask(3).getStartDateTime(),1,1);
+                TaskStatus.NEW, 3, taskManager.getSubTask(3).getStartDateTime(),0,1);
         List<Task> collectionSubTask = new ArrayList<>();
         collectionSubTask.add(currentSubTask);
         collectionSubTask.add(currentSubtask2);
@@ -448,11 +461,11 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         taskManager.saveTask(task);
         task = new Task(
                 "Задача №1 Обновление",
-                "Описание задачи №1 Обновление",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1 Обновление",1, taskManager.getTask(1).getStartDateTime(),0);
         taskManager.updateTask(task);
         Task currentTask = new Task(
                 "Задача №1 Обновление",
-                "Описание задачи №1 Обновление",1, taskManager.getTask(1).getStartDateTime(),1);
+                "Описание задачи №1 Обновление",1, taskManager.getTask(1).getStartDateTime(),0);
 
         Assertions.assertEquals(taskManager.getTask(1), currentTask);
     }
@@ -467,13 +480,13 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         subTask = new SubTask(
                 "Подзадача №1 Обновление",
                 "Описание Подзадачи №1 Обновление",
-                 TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),1,1
+                 TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),0,1
         );
         taskManager.updateSubTask(subTask);
         SubTask currentsubTask = new SubTask(
                 "Подзадача №1 Обновление",
                 "Описание Подзадачи №1 Обновление",
-                TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),1,1
+                TaskStatus.NEW, 2, taskManager.getSubTask(2).getStartDateTime(),0,1
         );
 
         Assertions.assertEquals(taskManager.getSubTask(2), currentsubTask);
@@ -487,12 +500,12 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         epic = new Epic(
                 "Эпик №1 Обновление",
                 "Описание Эпика №1 Обновление",1,
-                taskManager.getEpic(1).getStartDateTime(),1);
+                taskManager.getEpic(1).getStartDateTime(),0);
         taskManager.updateEpic(epic);
         Epic currentEpic = new Epic(
                 "Эпик №1 Обновление",
                 "Описание Эпика №1 Обновление",1,
-                taskManager.getEpic(1).getStartDateTime(),1);
+                taskManager.getEpic(1).getStartDateTime(),0);
 
         Assertions.assertEquals(taskManager.getEpic(1), currentEpic);
     }

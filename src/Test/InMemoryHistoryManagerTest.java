@@ -6,7 +6,6 @@ import com.yandex.kanban.service.InMemoryTaskManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,9 +47,9 @@ public class InMemoryHistoryManagerTest {
         inMemoryTaskManager.removeEpic(1);
 
         Epic epicTest = new Epic(
-                "Эпик №2", "Описание эпика №2", TaskStatus.NEW,2, LocalDateTime.now(),1);
+                "Эпик №2", "Описание эпика №2", TaskStatus.NEW,2, epic2.getStartDateTime(),0);
         Epic epicTest2 = new Epic(
-                "Эпик №3", "Описание эпика №3", TaskStatus.NEW,3, LocalDateTime.now(),1);
+                "Эпик №3", "Описание эпика №3", TaskStatus.NEW,3, epic3.getStartDateTime(),0);
         List<Epic> epicsTest = new ArrayList<>();
         epicsTest.add(epicTest);
         epicsTest.add(epicTest2);
@@ -75,9 +74,9 @@ public class InMemoryHistoryManagerTest {
         inMemoryTaskManager.removeEpic(2);
 
         Epic epicTest = new Epic(
-                "Эпик №1", "Описание эпика №1", TaskStatus.NEW,1, LocalDateTime.now(),1);
+                "Эпик №1", "Описание эпика №1", TaskStatus.NEW,1, epic.getStartDateTime(),0);
         Epic epicTest2 = new Epic(
-                "Эпик №3", "Описание эпика №3", TaskStatus.NEW,3, LocalDateTime.now(),1);
+                "Эпик №3", "Описание эпика №3", TaskStatus.NEW,3, epic3.getStartDateTime(),0);
         List<Epic> epicsTest = new ArrayList<>();
         epicsTest.add(epicTest);
         epicsTest.add(epicTest2);
@@ -102,9 +101,9 @@ public class InMemoryHistoryManagerTest {
         inMemoryTaskManager.removeEpic(3);
 
         Epic epicTest = new Epic(
-                "Эпик №1", "Описание эпика №1", TaskStatus.NEW,1, LocalDateTime.now(),1);
+                "Эпик №1", "Описание эпика №1", TaskStatus.NEW,1, epic.getStartDateTime(),0);
         Epic epicTest2 = new Epic(
-                "Эпик №2", "Описание эпика №2", TaskStatus.NEW,2, LocalDateTime.now(),1);
+                "Эпик №2", "Описание эпика №2", TaskStatus.NEW,2, epic2.getStartDateTime(),0);
         List<Epic> epicsTest = new ArrayList<>();
         epicsTest.add(epicTest);
         epicsTest.add(epicTest2);

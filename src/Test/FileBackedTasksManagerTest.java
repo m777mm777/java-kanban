@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +66,7 @@ public class FileBackedTasksManagerTest extends InMemoryTaskManagerTest <FileBac
         Task task = new Task("Задача №1", "Описание задачи №1");
         fileBackedManager.saveTask(task);
         Task task1 = new Task(
-                "Задача №1", "Описание задачи №1", TaskStatus.NEW,1, LocalDateTime.now(),1);
+                "Задача №1", "Описание задачи №1", TaskStatus.NEW,1, task.getStartDateTime(),0);
         Map<Integer, Task> taskStorageTest = new HashMap<>();
         taskStorageTest.put(1,task1);
         Assertions.assertEquals(fileBackedManager.getTask(1),taskStorageTest.get(1));

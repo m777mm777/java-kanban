@@ -38,18 +38,30 @@ public class CSVFormatHandler {
         Integer duration;
 
         if (tupe == TaskType.EPIC) {
-            startDateTime = LocalDateTime.parse(parts[5]);
+            if (parts[5].equals("null")) {
+                startDateTime = null;
+            }else {
+                startDateTime = LocalDateTime.parse(parts[5]);
+            }
             duration = Integer.valueOf(parts[6]);
             Epic epic = new Epic(name, description, status, id, startDateTime, duration);
             return epic;
         } else if (tupe == TaskType.SUBTASK) {
             int epikId = Integer.parseInt(parts[7]);
-            startDateTime = LocalDateTime.parse(parts[5]);
+            if (parts[5].equals("null")) {
+                startDateTime = null;
+            }else {
+                startDateTime = LocalDateTime.parse(parts[5]);
+            }
             duration = Integer.valueOf(parts[6]);
             SubTask subTask = new SubTask(name, description, status, id, startDateTime, duration, epikId);
             return subTask;
         }else {
-            startDateTime = LocalDateTime.parse(parts[5]);
+            if (parts[5].equals("null")) {
+                startDateTime = null;
+            }else {
+                startDateTime = LocalDateTime.parse(parts[5]);
+            }
             duration = Integer.valueOf(parts[6]);
             Task task = new Task(name, description, status, id, startDateTime, duration);
             return task;

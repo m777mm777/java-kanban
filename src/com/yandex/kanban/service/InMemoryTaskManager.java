@@ -5,6 +5,7 @@ import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -20,38 +21,38 @@ public class InMemoryTaskManager implements TaskManager {
     protected Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private void prioritizedTask(Task task) {
-        prioritizedTasks.add(task);
-        validate();
-    }
 
-    //проверка пересечения времени
-    private boolean checkTimeIntersection(Task task) {
-        List<Task> tasks = List.copyOf(prioritizedTasks);
-        if (tasks.size() > 0) {
-            for (Task taskPrioritized : tasks) {
-                    if (task.getStartDateTime().isBefore(taskPrioritized.getStartDateTime())
-                            && !task.getEndDateTime().isBefore(taskPrioritized.getStartDateTime())) {
-                        return true;
-                    } else if (task.getStartDateTime().isAfter(taskPrioritized.getStartDateTime())
-                            && task.getEndDateTime().isBefore(taskPrioritized.getStartDateTime())) {
-                        return true;
-                    }
-            }
-        } else {
-            return false;
+    //Если это решение не годится подскажи плз как можно сюда добавить задачу если ее время начала null?
+    private void prioritizedTask(Task task) {
+        if (task.getStartDateTime() == null) {
+            task.setStartDateTime(LocalDateTime.of(2030, 1, 1,1,task.getId()));
         }
-        return false;
+        prioritizedTasks.add(task);
     }
 
     //Проверка пересечения задачи
-    private void validate() {
-        Set<Task> tasks = getPrioritizedTasks();
-            for (Task task: tasks) {
-            if (checkTimeIntersection(task)) {
+    private void validate(Task task) {
+        Set<Task> tasksPrioritized = getPrioritizedTasks();
+        if (tasksPrioritized.size() < 1) {
+        for (Task tasks : tasksPrioritized) {
+            int i = 0;
+            if (!tasks.getEndDateTime().isAfter(task.getStartDateTime())) {
+                i++;
+            } else {
+                continue;
+            }
+            if (!tasks.getStartDateTime().isBefore(tasks.getEndDateTime())) {
+                i++;
+            } else {
+                continue;
+            }
+            if (task.getId() == tasks.getId()) {
+                continue;
+            } else if (i == 2) {
                 throw new TaskValidateException("Задачи пересекаются");
             }
         }
+    }
     }
 
     //Получение списка задачь по приоритетности
@@ -60,25 +61,13 @@ public class InMemoryTaskManager implements TaskManager {
         return prioritizedTasks;
     }
 
-    //Восстановление истории просмотров
-    public void loadHistory(List<Integer> idHistory) {
-        for (int id : idHistory) {
-            if (taskStorage.containsKey(id)) {
-                historyManager.add(taskStorage.get(id));
-            } else if (subTaskStorage.containsKey(id)) {
-                historyManager.add(subTaskStorage.get(id));
-            } else if (epicStorage.containsKey(id)) {
-                historyManager.add(epicStorage.get(id));
-            }
-        }
-    }
-
     // Создание задачи TASK
     @Override
     public Task saveTask(Task task) {
         int id = getGenerateId();
         task.setId(id);
         taskStorage.put(id, task);
+        validate(task);
         prioritizedTask(task);
         return task;
     }
@@ -105,6 +94,8 @@ public class InMemoryTaskManager implements TaskManager {
             subTaskStorage.put(id, subTask);
             epic.addSubtaskIds(id);
             checkStatusEpikId(epic);
+            chekEndDataTimeEpicBySubtask(epic);
+            validate(subTask);
             prioritizedTask(subTask);
             return subTask;
         }else {
@@ -139,6 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicStorage.get(epicId);
         epic.removeIdFromSubtaskIds(id);
         checkStatusEpikId(epic);
+        chekEndDataTimeEpicBySubtask(epic);
         prioritizedTasks.remove(subTask);
         System.out.println("Подзадача и ее привязка к эпику удалена");
     }
@@ -170,7 +162,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllTask (){
         for (Task task : taskStorage.values()) {
             historyManager.remove(task.getId());
-            prioritizedTasks.remove(taskStorage.get(task.getId()));
+            prioritizedTasks.remove(task);
         }
         taskStorage.clear();
     }
@@ -180,12 +172,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubTask() {
         for (SubTask subTask: subTaskStorage.values()) {
             historyManager.remove(subTask.getEpicId());
-            prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
+            prioritizedTasks.remove(subTask);
         }
         subTaskStorage.clear();
         for (Epic epic : epicStorage.values()) {
             epic.removeAllSubtaskIds();
             checkStatusEpikId(epic);
+            chekEndDataTimeEpicBySubtask(epic);
         }
         System.out.println("Все позадачи и их привязка по id к епикам удалены");
     }
@@ -195,7 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllEpic(){
         for (SubTask subTask: subTaskStorage.values()) {
             historyManager.remove(subTask.getId());
-            prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
+            prioritizedTasks.remove(subTask);
         }
         for (Epic epic: epicStorage.values()) {
             historyManager.remove(epic.getId());
@@ -269,10 +262,13 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return;
         }
+        validate(task);
         prioritizedTasks.remove(taskStorage.get(task.getId()));
+        prioritizedTask(task);
         taskStorage.put(task.getId(), task);
         historyManager.add(task);
-        prioritizedTask(task);
+
+
     }
 
     //Обновление-Перезапись Епика с сохранением id
@@ -295,12 +291,30 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         int id = subTask.getId();
-        prioritizedTasks.remove(subTaskStorage.get(subTask.getId()));
+        validate(subTask);
+        prioritizedTasks.remove(subTaskStorage.get(id));
+        prioritizedTask(subTask);
         subTaskStorage.put(id, subTask);
         historyManager.add(subTask);
-        prioritizedTask(subTask);
         Epic epic = epicStorage.get(subTask.getEpicId());
+        chekEndDataTimeEpicBySubtask(epic);
         checkStatusEpikId(epic);
+    }
+
+    //Проверка окончания времени епика исходя из сабтасков
+    private void chekEndDataTimeEpicBySubtask(Epic epic) {
+        LocalDateTime maxDataTimeEnd = LocalDateTime.of(2030, 1, 1, 0, 0, 0);
+        for (Integer epicSubtaskId : epic.getSubTaskId()) {
+        SubTask subTask = subTaskStorage.get(epicSubtaskId);
+        if (subTask.getStartDateTime() != null) {
+            if(subTask.getEndDateTime().isBefore(maxDataTimeEnd)) {
+                maxDataTimeEnd = subTask.getEndDateTime();
+                epic.setEndDateTime(maxDataTimeEnd);
+            }
+            } else {
+            epic.setEndDateTime(maxDataTimeEnd);
+        }
+        }
     }
 
     //Проверка и обновление статуса EPIK по id
@@ -332,6 +346,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         }
+        chekEndDataTimeEpicBySubtask(epic);
     }
 
     //Создание id

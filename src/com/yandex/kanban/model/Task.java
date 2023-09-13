@@ -9,9 +9,9 @@ public class Task {
     protected String description;
     protected TaskStatus status;
     protected LocalDateTime startDateTime;
-    protected Integer duration;
+    protected int duration;
 
-    public Task(String name, String description, TaskStatus status, int id, LocalDateTime time, Integer minutes) {
+    public Task(String name, String description, TaskStatus status, int id, LocalDateTime time, int minutes) {
         this.name = name;
         this.description = description;
         this.status = status;
@@ -24,11 +24,11 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
-        this.startDateTime = LocalDateTime.now();
+        this.startDateTime = null;
         this.duration = 0;
     }
 
-    public Task(String name, String description, int id, LocalDateTime time, Integer minutes) {
+    public Task(String name, String description, int id, LocalDateTime time, int minutes) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
@@ -76,7 +76,14 @@ public class Task {
     }
 
     public LocalDateTime getEndDateTime() {
+        if (startDateTime == null) {
+            return null;
+        }
         return startDateTime.plusMinutes(duration);
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
     }
 
     public Integer getDuration() {
