@@ -6,8 +6,6 @@ import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -27,9 +25,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Проверка пересечения задачи
     private void validate(Task task) {
-        if (task.getStartDateTime() != null) {
 
-        for (Task tasks : prioritizedTasks) {
+        if (task.getStartDateTime() != null) {
+            for (Task tasks : prioritizedTasks) {
             if (tasks.getStartDateTime() == null) {
                 continue;
             }
@@ -41,9 +39,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
             if (tasks.getId().equals(task.getId())) {
                 continue;
-            } else {
-                throw new TaskValidateException("Задачи пересекаются");
             }
+            throw new TaskValidateException("Задачи пересекаются");
         }
         }
     }
@@ -310,11 +307,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (endEpic == null || endEpic.isAfter(endTimeSubtask)) {
                 endEpic = endTimeSubtask;
             }
-            ZonedDateTime start = ZonedDateTime.of(startEpic, ZoneId.systemDefault());
-            long startMilli = start.toInstant().toEpochMilli();
-            ZonedDateTime end = ZonedDateTime.of(endEpic, ZoneId.systemDefault());
-            long endMilli = end.toInstant().toEpochMilli();
-            duration = (int) ((endMilli - startMilli)%60);
+            duration += currentSubtask.getDuration();
         }
         epic.setEndDateTime(endEpic);
         epic.setStartDateTime(startEpic);

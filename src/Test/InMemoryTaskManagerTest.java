@@ -34,7 +34,7 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
         Task task2 = new Task("Задача №2", "Описание задачи №2",
                 2 , LocalDateTime.of(2002, 1, 1, 1, 2 ),30);
         taskManager.saveTask(task2);
-        
+
         Task newTask = new Task("Задача №1", "Описание задачи №1",
                 1 , LocalDateTime.of(2001, 1, 1, 1, 2 ),30);
         Task newTask2 = new Task("Задача №2", "Описание задачи №2",

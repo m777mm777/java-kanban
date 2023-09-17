@@ -114,9 +114,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             writer.write(handler.historyToString(historyManager));
             writer.newLine();
 
-            writer.newLine();
-            writer.write(handler.prioritizedTasksToString(prioritizedTasks));
-
         } catch (IOException e) {
             throw new ManagerSaveException("Не удается прочитать файл для записи");
         }
@@ -135,23 +132,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    //Восстановление приоритетности
-    private void loadPrioritizedTasks(List<Integer> idPrioritizedTasks) {
-        for (int id : idPrioritizedTasks) {
-            if (taskStorage.containsKey(id)) {
-                prioritizedTasks.add(taskStorage.get(id));
-            } else if (subTaskStorage.containsKey(id)) {
-                prioritizedTasks.add(subTaskStorage.get(id));
-            } else if (epicStorage.containsKey(id)) {
-                prioritizedTasks.add(epicStorage.get(id));
-            }
-        }
-    }
-
+    //Загрузчик
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            int nextCommand = 0;
+            boolean nextCommand = false;
             String line = bufferedReader.readLine();
 
             if (line == null) {
@@ -160,10 +145,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 while (bufferedReader.ready()) {
                     line = bufferedReader.readLine();
                     if (!line.equals("")) {
-                        if (line.equals(handler.getHeader())) {
-                            continue;
-                        }
-                        if (nextCommand < 1) {
+                        if (!nextCommand) {
                             Task task = handler.fromString(line);
 
                             switch (task.getType()) {
@@ -177,25 +159,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                                     Epic epicValue = fileBackedTasksManager.epicStorage.get(subTask.getEpicId());
                                     epicValue.addSubtaskIds(subTask.getId());
                                     fileBackedTasksManager.chekEndDataTimeEpicBySubtask(epicValue);
+                                    fileBackedTasksManager.prioritizedTasks.add(subTask);
                                     break;
                                 case TASK:
                                     fileBackedTasksManager.taskStorage.put(task.getId(), task);
+                                    fileBackedTasksManager.prioritizedTasks.add(task);
                                     break;
                             }
                         } else {
-                            switch (nextCommand) {
-                                case 1:
+                            if (nextCommand) {
                                     List<Integer> idHistory = handler.historyFromString(line);
                                     fileBackedTasksManager.loadHistory(idHistory);
-                                    break;
-                                case 2:
-                                    List<Integer> idPrioritized = handler.StringToPrioritizedTasks(line);
-                                    fileBackedTasksManager.loadPrioritizedTasks(idPrioritized);
-                                    break;
                             }
                         }
                     } else {
-                        nextCommand++;
+                        nextCommand = true;
                     }
                 }
             }
