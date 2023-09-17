@@ -6,6 +6,8 @@ import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -17,42 +19,33 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> taskStorage = new HashMap<>();
     protected Map<Integer, Epic> epicStorage = new HashMap<>();
     protected Map<Integer, SubTask> subTaskStorage = new HashMap<>();
-    private final Comparator<Task> taskComparator = Comparator.comparing(Task::getStartDateTime);
+    private final Comparator<Task> taskComparator
+           = Comparator.comparing(Task::getStartDateTime,
+         Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Task::getId);
     protected Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
-
-    //Если это решение не годится подскажи плз как можно сюда добавить задачу если ее время начала null?
-    private void prioritizedTask(Task task) {
-        if (task.getStartDateTime() == null) {
-            task.setStartDateTime(LocalDateTime.of(2030, 1, 1,1,task.getId()));
-        }
-        prioritizedTasks.add(task);
-    }
-
     //Проверка пересечения задачи
     private void validate(Task task) {
-        Set<Task> tasksPrioritized = getPrioritizedTasks();
-        if (tasksPrioritized.size() < 1) {
-        for (Task tasks : tasksPrioritized) {
-            int i = 0;
+        if (task.getStartDateTime() != null) {
+
+        for (Task tasks : prioritizedTasks) {
+            if (tasks.getStartDateTime() == null) {
+                continue;
+            }
             if (!tasks.getEndDateTime().isAfter(task.getStartDateTime())) {
-                i++;
-            } else {
                 continue;
             }
             if (!tasks.getStartDateTime().isBefore(tasks.getEndDateTime())) {
-                i++;
-            } else {
                 continue;
             }
-            if (task.getId() == tasks.getId()) {
+            if (tasks.getId().equals(task.getId())) {
                 continue;
-            } else if (i == 2) {
+            } else {
                 throw new TaskValidateException("Задачи пересекаются");
             }
         }
-    }
+        }
     }
 
     //Получение списка задачь по приоритетности
@@ -66,9 +59,9 @@ public class InMemoryTaskManager implements TaskManager {
     public Task saveTask(Task task) {
         int id = getGenerateId();
         task.setId(id);
-        taskStorage.put(id, task);
         validate(task);
-        prioritizedTask(task);
+        taskStorage.put(id, task);
+        prioritizedTasks.add(task);
         return task;
     }
 
@@ -91,12 +84,12 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setId(id);
         Epic epic = epicStorage.get(subTask.getEpicId());
         if (epic != null) {
+            validate(subTask);
             subTaskStorage.put(id, subTask);
             epic.addSubtaskIds(id);
             checkStatusEpikId(epic);
             chekEndDataTimeEpicBySubtask(epic);
-            validate(subTask);
-            prioritizedTask(subTask);
+            prioritizedTasks.add(subTask);
             return subTask;
         }else {
             System.out.println("Нет такого эпика");
@@ -263,12 +256,10 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         validate(task);
-        prioritizedTasks.remove(taskStorage.get(task.getId()));
-        prioritizedTask(task);
+        prioritizedTasks.remove(getTask(task.getId()));
+        prioritizedTasks.add(task);
         taskStorage.put(task.getId(), task);
         historyManager.add(task);
-
-
     }
 
     //Обновление-Перезапись Епика с сохранением id
@@ -293,7 +284,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = subTask.getId();
         validate(subTask);
         prioritizedTasks.remove(subTaskStorage.get(id));
-        prioritizedTask(subTask);
+        prioritizedTasks.add(subTask);
         subTaskStorage.put(id, subTask);
         historyManager.add(subTask);
         Epic epic = epicStorage.get(subTask.getEpicId());
@@ -302,19 +293,32 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Проверка окончания времени епика исходя из сабтасков
-    private void chekEndDataTimeEpicBySubtask(Epic epic) {
-        LocalDateTime maxDataTimeEnd = LocalDateTime.of(2030, 1, 1, 0, 0, 0);
-        for (Integer epicSubtaskId : epic.getSubTaskId()) {
-        SubTask subTask = subTaskStorage.get(epicSubtaskId);
-        if (subTask.getStartDateTime() != null) {
-            if(subTask.getEndDateTime().isBefore(maxDataTimeEnd)) {
-                maxDataTimeEnd = subTask.getEndDateTime();
-                epic.setEndDateTime(maxDataTimeEnd);
+    protected void chekEndDataTimeEpicBySubtask(Epic epic) {
+        int duration = 0;
+        LocalDateTime startEpic = null;
+        LocalDateTime endEpic = null;
+        for (Integer subtaskId : epic.getSubTaskId()) {
+            SubTask currentSubtask = subTaskStorage.get(subtaskId);
+            LocalDateTime startTimeSubtask = currentSubtask.getStartDateTime();
+            LocalDateTime endTimeSubtask = currentSubtask.getEndDateTime();
+            if (startTimeSubtask == null) {
+                continue;
             }
-            } else {
-            epic.setEndDateTime(maxDataTimeEnd);
+            if (startEpic == null || startEpic.isAfter(startTimeSubtask)) {
+                startEpic = startTimeSubtask;
+            }
+            if (endEpic == null || endEpic.isAfter(endTimeSubtask)) {
+                endEpic = endTimeSubtask;
+            }
+            ZonedDateTime start = ZonedDateTime.of(startEpic, ZoneId.systemDefault());
+            long startMilli = start.toInstant().toEpochMilli();
+            ZonedDateTime end = ZonedDateTime.of(endEpic, ZoneId.systemDefault());
+            long endMilli = end.toInstant().toEpochMilli();
+            duration = (int) ((endMilli - startMilli)%60);
         }
-        }
+        epic.setEndDateTime(endEpic);
+        epic.setStartDateTime(startEpic);
+        epic.setDuration(duration);
     }
 
     //Проверка и обновление статуса EPIK по id
@@ -346,7 +350,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(TaskStatus.IN_PROGRESS);
         }
-        chekEndDataTimeEpicBySubtask(epic);
     }
 
     //Создание id
@@ -361,5 +364,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 }
+
 
 

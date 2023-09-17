@@ -90,6 +90,10 @@ public class Task {
         return duration;
     }
 
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     @Override
     public String toString() {
         return "Task{" +

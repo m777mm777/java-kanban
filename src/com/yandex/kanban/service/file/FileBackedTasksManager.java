@@ -1,7 +1,11 @@
 package com.yandex.kanban.service.file;
 
-import com.yandex.kanban.model.*;
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.SubTask;
+import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.InMemoryTaskManager;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -64,12 +68,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedManager.removeEpic(3);//Удаление Епика и его Подзадач так же из истории
         fileBackedManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
 
+        System.out.println("приоритет лист 1" + fileBackedManager.getPrioritizedTasks());
         subTask1 = new SubTask(
                 "Подзадача №1",
                 "Описание Подзадачи №1",
-                TaskStatus.IN_PROGRESS, 5, LocalDateTime.now(),1,4);
+                TaskStatus.IN_PROGRESS, 5, LocalDateTime.now().plusDays(7),1,4);
+
         fileBackedManager.updateSubTask(subTask1);
 
+
+        System.out.println("приоритет лист 2" + fileBackedManager.getPrioritizedTasks());
         FileBackedTasksManager loadFromfFile = FileBackedTasksManager.loadFromFile(file);
 
         System.out.println("История просмотров задач " + fileBackedManager.getHistory());//Печать истории
@@ -77,10 +85,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Проверка епиков: " + loadFromfFile.epicStorage.equals(fileBackedManager.epicStorage));
         System.out.println("Проверка подзадач " + loadFromfFile.subTaskStorage.equals(fileBackedManager.subTaskStorage));
 
-        Task task23 = new Task("Задача №1", "Описание задачи №1");
-
-
-        fileBackedManager.saveTask(task23); //Создание задачи
         System.out.println("приоритет лист" + fileBackedManager.getPrioritizedTasks());
 
     }
@@ -108,6 +112,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             writer.newLine();
             writer.write(handler.historyToString(historyManager));
+            writer.newLine();
+
+            writer.newLine();
+            writer.write(handler.prioritizedTasksToString(prioritizedTasks));
 
         } catch (IOException e) {
             throw new ManagerSaveException("Не удается прочитать файл для записи");
@@ -127,10 +135,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
+    //Восстановление приоритетности
+    private void loadPrioritizedTasks(List<Integer> idPrioritizedTasks) {
+        for (int id : idPrioritizedTasks) {
+            if (taskStorage.containsKey(id)) {
+                prioritizedTasks.add(taskStorage.get(id));
+            } else if (subTaskStorage.containsKey(id)) {
+                prioritizedTasks.add(subTaskStorage.get(id));
+            } else if (epicStorage.containsKey(id)) {
+                prioritizedTasks.add(epicStorage.get(id));
+            }
+        }
+    }
+
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            boolean isNextHistory = false;
+            int nextCommand = 0;
             String line = bufferedReader.readLine();
 
             if (line == null) {
@@ -142,7 +163,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         if (line.equals(handler.getHeader())) {
                             continue;
                         }
-                        if (!isNextHistory) {
+                        if (nextCommand < 1) {
                             Task task = handler.fromString(line);
 
                             switch (task.getType()) {
@@ -155,17 +176,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                                     fileBackedTasksManager.subTaskStorage.put(subTask.getId(), subTask);
                                     Epic epicValue = fileBackedTasksManager.epicStorage.get(subTask.getEpicId());
                                     epicValue.addSubtaskIds(subTask.getId());
+                                    fileBackedTasksManager.chekEndDataTimeEpicBySubtask(epicValue);
                                     break;
                                 case TASK:
                                     fileBackedTasksManager.taskStorage.put(task.getId(), task);
                                     break;
                             }
                         } else {
-                            List<Integer> idHistory = handler.historyFromString(line);
-                            fileBackedTasksManager.loadHistory(idHistory);
+                            switch (nextCommand) {
+                                case 1:
+                                    List<Integer> idHistory = handler.historyFromString(line);
+                                    fileBackedTasksManager.loadHistory(idHistory);
+                                    break;
+                                case 2:
+                                    List<Integer> idPrioritized = handler.StringToPrioritizedTasks(line);
+                                    fileBackedTasksManager.loadPrioritizedTasks(idPrioritized);
+                                    break;
+                            }
                         }
                     } else {
-                        isNextHistory = true;
+                        nextCommand++;
                     }
                 }
             }

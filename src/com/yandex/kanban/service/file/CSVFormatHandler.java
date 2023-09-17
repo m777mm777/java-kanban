@@ -6,6 +6,7 @@ import com.yandex.kanban.service.HistoryManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class CSVFormatHandler {
     private static String DELIMITER = ",";
@@ -35,34 +36,22 @@ public class CSVFormatHandler {
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
         LocalDateTime startDateTime;
-        Integer duration;
+
+        if (parts[5].equals("null")) {
+            startDateTime = null;
+        }else {
+            startDateTime = LocalDateTime.parse(parts[5]);
+        }
+        Integer duration = Integer.valueOf(parts[6]);
 
         if (tupe == TaskType.EPIC) {
-            if (parts[5].equals("null")) {
-                startDateTime = null;
-            }else {
-                startDateTime = LocalDateTime.parse(parts[5]);
-            }
-            duration = Integer.valueOf(parts[6]);
             Epic epic = new Epic(name, description, status, id, startDateTime, duration);
             return epic;
         } else if (tupe == TaskType.SUBTASK) {
             int epikId = Integer.parseInt(parts[7]);
-            if (parts[5].equals("null")) {
-                startDateTime = null;
-            }else {
-                startDateTime = LocalDateTime.parse(parts[5]);
-            }
-            duration = Integer.valueOf(parts[6]);
             SubTask subTask = new SubTask(name, description, status, id, startDateTime, duration, epikId);
             return subTask;
         }else {
-            if (parts[5].equals("null")) {
-                startDateTime = null;
-            }else {
-                startDateTime = LocalDateTime.parse(parts[5]);
-            }
-            duration = Integer.valueOf(parts[6]);
             Task task = new Task(name, description, status, id, startDateTime, duration);
             return task;
         }
@@ -87,6 +76,27 @@ public class CSVFormatHandler {
         }
         return historyTasks;
     }
+
+    //из списка приоритетности в строку с id для сохранения
+    String prioritizedTasksToString(Set<Task> prioritizedTasks) {
+        List<String> result = new ArrayList<>();
+        for(Task task: prioritizedTasks) {
+            result.add(String.valueOf(task.getId()));
+        }
+        return String.join(DELIMITER,result);
+    }
+
+    //из строки в список id приоритетности
+    List<Integer> StringToPrioritizedTasks(String line) {
+        List<Integer> prioritizedTasks = new ArrayList<>();
+        String[] parts = line.split(",");
+        for (String part : parts) {
+            int id = Integer.parseInt(part);
+            prioritizedTasks.add(id);
+        }
+        return prioritizedTasks;
+    }
+
 
 //Шапка CSV файла
     String getHeader() {

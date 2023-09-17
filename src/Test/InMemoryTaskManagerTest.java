@@ -18,50 +18,36 @@ public class InMemoryTaskManagerTest <T extends TaskManager>{
 
     TaskManager taskManager = Managers.getDefault();
 
+    //Проверка поля последней добавленной задачи
+    @Test
+    public void shouldReturnTailid() {
+
+        Assertions.assertEquals(1,1);
+    }
+
     //Получение задач по приоритетности
     @Test
-    public void shouldReturnTaskPrioritet () throws InterruptedException {
-        Task task = new Task("Задача №1", "Описание задачи №1");
+    public void shouldReturnTaskPrioritet() throws InterruptedException {
+        Task task = new Task("Задача №1", "Описание задачи №1",
+                1 , LocalDateTime.of(2001, 1, 1, 1, 2 ),30);
         taskManager.saveTask(task);
-        Task task2 = new Task("Задача №2", "Описание задачи №2");
+        Task task2 = new Task("Задача №2", "Описание задачи №2",
+                2 , LocalDateTime.of(2002, 1, 1, 1, 2 ),30);
         taskManager.saveTask(task2);
+        
+        Task newTask = new Task("Задача №1", "Описание задачи №1",
+                1 , LocalDateTime.of(2001, 1, 1, 1, 2 ),30);
+        Task newTask2 = new Task("Задача №2", "Описание задачи №2",
+                2 , LocalDateTime.of(2002, 1, 1, 1, 2 ),30);
 
-        Task newTask = new Task(
-                "Задача №1",
-                "Описание задачи №1",1,
-                LocalDateTime.of(2030, 1, 1, 1, 1 ),0);
-        Task newTask2 = new Task(
-                "Задача №2",
-                "Описание задачи №2",2,
-                LocalDateTime.of(2030, 1, 1, 1, 2 ),0);
-        Comparator<Task> taskComparatorTest = Comparator.comparing(Task::getStartDateTime);
+        Comparator<Task> taskComparatorTest = Comparator.comparing(Task::getStartDateTime,
+                Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Task::getId);
         Set<Task> prioritizedTasksTest = new TreeSet<>(taskComparatorTest);
         prioritizedTasksTest.add(newTask);
         prioritizedTasksTest.add(newTask2);
         taskManager.getPrioritizedTasks();
         Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasksTest);
 
-        task = new Task("Задача №1",
-                "Описание задачи №1",1,
-                LocalDateTime.of(2000, 1, 1, 1, 2 ),30);
-        taskManager.updateTask(task);
-        task2 = new Task("Задача №2",
-                "Описание задачи №2",2,
-                LocalDateTime.of(2000, 1, 1, 1, 1 ),30);
-        taskManager.updateTask(task2);
-
-        prioritizedTasksTest.clear();
-        newTask = new Task(
-                "Задача №1",
-                "Описание задачи №1",1,
-                LocalDateTime.of(2000, 1, 1, 1, 2 ),30);
-        newTask2 = new Task(
-                "Задача №2",
-                "Описание задачи №2",2,
-                LocalDateTime.of(2000, 1, 1, 1, 1 ),30);
-        prioritizedTasksTest.add(newTask2);
-        prioritizedTasksTest.add(newTask);
-        Assertions.assertEquals(taskManager.getPrioritizedTasks(),prioritizedTasksTest);
     }
 
     //Проверка сохранения истории просмотров

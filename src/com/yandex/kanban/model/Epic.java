@@ -13,11 +13,11 @@ public class Epic extends Task {
         super(name, description);
     }
 
-    public Epic(String name, String description, TaskStatus status, int id, LocalDateTime time, Integer minutes) {
+    public Epic(String name, String description, TaskStatus status, int id, LocalDateTime time, int minutes) {
         super(name, description, status, id, time, minutes);
     }
 
-    public Epic(String name, String description, int id, LocalDateTime time, Integer minutes) {
+    public Epic(String name, String description, int id, LocalDateTime time, int minutes) {
         super(name, description, id, time, minutes);
     }
 
