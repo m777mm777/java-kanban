@@ -1,29 +1,27 @@
-package com.yandex.kanban;
+package Test;
 
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
-import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.Managers;
 import http.HttpTaskManager;
 import http.KVServer;
+import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.util.List;
 
-public class Main {
+import static org.junit.jupiter.api.Assertions.*;
 
-    public static void main(String[] args) {
+public class HttpTaskManagerTest {
 
-        try {
+    @Test
+    void saveAndLoad() throws IOException, InterruptedException {
 
-            KVServer server;
-            server = new KVServer();
-            server.start();
+        KVServer server;
+        server = new KVServer();
+        server.start();
         HttpTaskManager taskManager = Managers.getDefault(8077);
-
-
-            System.out.println("все задачи " + taskManager.getAllTasks());
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
         Task task1 = new Task("Задача №1", "Описание задачи №1");
         Task task2 = new Task("Задача №2", "Описание задачи №2");
@@ -62,31 +60,26 @@ public class Main {
         taskManager.getSubTask(6);//Получение Подзадачи должно отразится в истории
         taskManager.getSubTask(7);//Получение Подзадачи должно отразится в истории
 
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
+        taskManager.clean();
 
-        taskManager.removeTask(1);//Удаление задачи 1 и из истории
+        List<Task> tasks = taskManager.getAllTasks();
+        List<Epic> epics = taskManager.getAllEpic();
+        List<SubTask> subTasks = taskManager.getAllSubTask();
 
-        System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
 
-        taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
+        assertEquals(0,tasks.size(), "Список Таск не пуст");
+        assertEquals(0,epics.size(), "Список Епик не пуст");
+        assertEquals(0,subTasks.size(), "Список Сабтаск не пуст");
 
-        subTask1 = new SubTask(
-                "Подзадача №1",
-                "Описание Подзадачи №1", TaskStatus.IN_PROGRESS, 5, LocalDateTime.now(),1,3);
+        taskManager.load();
 
-        taskManager.updateSubTask(subTask1);
+        List<Task> tasksLoad = taskManager.getAllTasks();
+        List<Epic> epicsLoad = taskManager.getAllEpic();
+        List<SubTask> subTasksLoad = taskManager.getAllSubTask();
 
-            taskManager.getSubTask(5);//Получение Подзадачи должно отразится в истории
-
-            System.out.println("приоритет задач " + taskManager.getPrioritizedTasks()); //получение задачь по приоритетности
-
-            System.out.println("История просмотров задач " + taskManager.getHistory());//Печать истории
-
-            System.out.println("end");
-
-} catch (Exception exception) {
-    exception.printStackTrace();
-}
+        assertNotNull(tasksLoad, "Список Таск не пуст");
+        assertNotNull(epicsLoad, "Список Епик не пуст");
+        assertNotNull(subTasksLoad, "Список Сабтаск не пуст");
 
     }
 

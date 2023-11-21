@@ -9,6 +9,10 @@ import java.util.Set;
 
 public interface TaskManager {
 
+    //Очистка
+    public default void clean() {
+
+    }
     //Возврат коллекции задач по приоритету
     public Set<Task> getPrioritizedTasks();
     // Создание задачи TASK
@@ -42,20 +46,29 @@ public interface TaskManager {
     //Получение задачи по id TASK
     public Task getTask(int id);
 
+    //Проверка есть ли задачи по id TASK
+    public boolean chekTask(int id);
+
     //Получение подзадачи по id SUBTASK
     public SubTask getSubTask(int epicId);
 
+    //Проверка есть ли задачи по id SubTask
+    public boolean chekSubTask(int id);
+
     //Получение епика по id EPIK
     public Epic getEpic(int epicId);
+
+    //Проверка есть ли задачи по id Epic
+    public boolean chekEpic(int id);
 
     //Получение всех задач TASK
     public List<Task> getAllTasks();
 
     //Получение всех епиков EPIK
-    public List<Task> getAllEpic();
+    public List<Epic> getAllEpic();
 
     //Получение всех подзадачь из всех эпиков без самих эпиков SUBTASK
-    public List<Task> getAllSubTask();
+    public List<SubTask> getAllSubTask();
 
     //Получение всех задач одного Эпика
     public List<SubTask> getSubtaskByEpik(int id);

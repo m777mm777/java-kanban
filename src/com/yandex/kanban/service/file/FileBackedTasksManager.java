@@ -11,7 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
+
 public class FileBackedTasksManager extends InMemoryTaskManager {
+
 
     private final File file;
     private final static CSVFormatHandler handler = new CSVFormatHandler();
@@ -20,11 +23,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.file = file;
     }
 
+
     public static void main(String[] args) {
 
         File file = new File("src/data/data.csv");
-        FileBackedTasksManager fileBackedManager = loadFromFile(file);
+        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
+        fileBackedManager.loadFromFile(file);
         System.out.println("История просмотров задач " + fileBackedManager.getHistory());//Печать истории
 
         Task task1 = new Task("Задача №1", "Описание задачи №1");
@@ -78,7 +83,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
         System.out.println("приоритет лист 2" + fileBackedManager.getPrioritizedTasks());
-        FileBackedTasksManager loadFromfFile = FileBackedTasksManager.loadFromFile(file);
+        FileBackedTasksManager loadFromfFile = new FileBackedTasksManager(file);
 
         System.out.println("История просмотров задач " + fileBackedManager.getHistory());//Печать истории
         System.out.println("Проверка задач: " + loadFromfFile.taskStorage.equals(fileBackedManager.taskStorage));
@@ -90,7 +95,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     //Сохранение прогресса менеджера в CSV
-    private void save() {
+    public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(handler.getHeader());
             writer.newLine();
@@ -120,7 +125,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     //Восстановление истории просмотров
-    private void loadHistory(List<Integer> idHistory) {
+    public void loadHistory(List<Integer> idHistory) {
         for (int id : idHistory) {
             if (taskStorage.containsKey(id)) {
                 historyManager.add(taskStorage.get(id));
@@ -133,8 +138,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     //Загрузчик
-    public static FileBackedTasksManager loadFromFile(File file) {
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+    public void loadFromFile(File file) {
+
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             boolean nextCommand = false;
             String line = bufferedReader.readLine();
@@ -144,40 +149,39 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             } else {
                 while (bufferedReader.ready()) {
                     line = bufferedReader.readLine();
-                    if (!line.equals("")) {
+                    if (!line.isEmpty()) {
                         if (!nextCommand) {
                             Task task = handler.fromString(line);
 
                             switch (task.getType()) {
                                 case EPIC:
                                     Epic epic = (Epic) task;
-                                    fileBackedTasksManager.epicStorage.put(epic.getId(), epic);
+                                    epicStorage.put(epic.getId(), epic);
                                     break;
                                 case SUBTASK:
                                     SubTask subTask = (SubTask) task;
-                                    fileBackedTasksManager.subTaskStorage.put(subTask.getId(), subTask);
-                                    Epic epicValue = fileBackedTasksManager.epicStorage.get(subTask.getEpicId());
+                                    subTaskStorage.put(subTask.getId(), subTask);
+                                    Epic epicValue = epicStorage.get(subTask.getEpicId());
                                     epicValue.addSubtaskIds(subTask.getId());
-                                    fileBackedTasksManager.chekEndDataTimeEpicBySubtask(epicValue);
-                                    fileBackedTasksManager.prioritizedTasks.add(subTask);
+                                    chekEndDataTimeEpicBySubtask(epicValue);
+                                    prioritizedTasks.add(subTask);
                                     break;
                                 case TASK:
-                                    fileBackedTasksManager.taskStorage.put(task.getId(), task);
-                                    fileBackedTasksManager.prioritizedTasks.add(task);
+                                    taskStorage.put(task.getId(), task);
+                                    prioritizedTasks.add(task);
                                     break;
                             }
                         } else {
-                            if (nextCommand) {
+
                                     List<Integer> idHistory = handler.historyFromString(line);
-                                    fileBackedTasksManager.loadHistory(idHistory);
-                            }
+                                    loadHistory(idHistory);
+
                         }
                     } else {
                         nextCommand = true;
                     }
                 }
             }
-            return fileBackedTasksManager;
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось считать данные из файла.");
         }
@@ -257,6 +261,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return newTask;
     }
 
+    @Override
+    public boolean chekTask(int id) {
+        boolean i = taskStorage.containsKey(id);
+        return i;
+    }
     //Получение подзадачи по id SUBTASK а так же добавление в историю просмотров
     @Override
     public SubTask getSubTask(int id) {
@@ -265,12 +274,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return newSubtask;
     }
 
+    //проверка есть ли SubTask по id
+    @Override
+    public boolean chekSubTask(int id) {
+        boolean i = subTaskStorage.containsKey(id);
+        return i;
+    }
+
     //Получение епика по id EPIK а так же добавление в историю просмотров
     @Override
     public Epic getEpic(int id) {
         Epic newEpic = super.getEpic(id);
         save();
         return newEpic;
+    }
+
+    //проверка есть ли Epic по id
+    @Override
+    public boolean chekEpic(int id) {
+        boolean i = epicStorage.containsKey(id);
+        return i;
     }
 
     //Обновление-Перезапись задач с сохранением id
@@ -293,6 +316,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.updateSubTask(subTask);
         save();
     }
+
+
 
     private static class ManagerSaveException extends RuntimeException {
         public ManagerSaveException(final String message) {

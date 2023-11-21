@@ -9,6 +9,7 @@ import com.yandex.kanban.service.TaskManager;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -16,7 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemoryTaskManagerTest <T extends TaskManager>{
 
-    TaskManager taskManager = Managers.getDefault();
+    TaskManager taskManager = Managers.getDefaultInMemoryTaskManager();
+
+    public InMemoryTaskManagerTest() throws IOException, InterruptedException {
+    }
 
     //Проверка поля последней добавленной задачи
     @Test

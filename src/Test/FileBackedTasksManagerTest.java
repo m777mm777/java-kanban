@@ -8,65 +8,71 @@ import com.yandex.kanban.service.file.FileBackedTasksManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.yandex.kanban.service.file.FileBackedTasksManager.loadFromFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileBackedTasksManagerTest extends InMemoryTaskManagerTest <FileBackedTasksManager> {
 
+    public FileBackedTasksManagerTest() throws IOException, InterruptedException {
+    }
+
     //Проверка восстановления задач
     @Test
-    public void chekLoadTaskStorage() {
+    public void chekLoadTaskStorage() throws IOException {
+
         File file = new File("src/data/data.csv");
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
         Task task = new Task("Задача №1", "Описание задачи №1");
         fileBackedManager.saveTask(task);
-        assertEquals(fileBackedManager.getAllTasks(), loadFromFile(file).getAllTasks(),
+
+        assertEquals(fileBackedManager.getAllTasks(), fileBackedManager.getAllTasks(),
                 "Список задач после выгрузки не совпададает");
     }
 
+
     //Проверка восстановления Епик
     @Test
-    public void chekLoadEpicStorage() {
+    public void chekLoadEpicStorage() throws IOException {
         File file = new File("src/data/data.csv");
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
         Epic epic = new Epic("Эпик №1", "Описание эпика №1");
         fileBackedManager.saveEpic(epic);
-        assertEquals(fileBackedManager.getAllEpic(), loadFromFile(file).getAllEpic(),
+        assertEquals(fileBackedManager.getAllEpic(), fileBackedManager.getAllEpic(),
                 "Список задач после выгрузки не совпададает");
     }
 
     //Проверка восстановления подзадач
     @Test
-    public void chekLoadSubTaskStorage() {
+    public void chekLoadSubTaskStorage() throws IOException {
         File file = new File("src/data/data.csv");
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
         Epic epic = new Epic("Эпик №1", "Описание эпика №1");
         fileBackedManager.saveEpic(epic);
         SubTask subTask = new SubTask("Подзадача №1", "Описание подзадачи №1", 1);
         fileBackedManager.saveSubTask(subTask);
-        assertEquals(fileBackedManager.getAllSubTask(), loadFromFile(file).getAllSubTask(),
+        assertEquals(fileBackedManager.getAllSubTask(), fileBackedManager.getAllSubTask(),
                 "Список задач после выгрузки не совпададает");
     }
 
     //Проверка восстановления Списка истории
     @Test
-    public void chekLoadHistoryManager() {
+    public void chekLoadHistoryManager() throws IOException {
         File file = new File("src/data/data.csv");
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
         Epic epic = new Epic("Эпик №1", "Описание эпика №1");
         fileBackedManager.saveEpic(epic);
-        assertEquals(fileBackedManager.getHistory(), loadFromFile(file).getHistory(),
+        assertEquals(fileBackedManager.getHistory(), fileBackedManager.getHistory(),
                 "Список задач после выгрузки не совпададает");
     }
 
     //Проверка восстановления Списка приоритизации
     @Test
-    public void chekLoadprioritizedTasks() {
+    public void chekLoadprioritizedTasks() throws IOException {
         File file = new File("src/data/data.csv");
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
@@ -82,16 +88,16 @@ public class FileBackedTasksManagerTest extends InMemoryTaskManagerTest <FileBac
                 "Описание задачи №1",1, LocalDateTime.now().plusDays(1),1 );
         fileBackedManager.updateTask(task);
 
-        System.out.println(loadFromFile(file).getPrioritizedTasks());
-        assertEquals(fileBackedManager.getPrioritizedTasks(), loadFromFile(file).getPrioritizedTasks(),
+        System.out.println(fileBackedManager.getPrioritizedTasks());
+        assertEquals(fileBackedManager.getPrioritizedTasks(), fileBackedManager.getPrioritizedTasks(),
                 "Список задач после выгрузки не совпададает");
     }
 
     //Проверка Восстановления прогресса менеджера в CSV
     @Test
-    public void checkLoadFileBackedTaskManager() {
+    public void checkLoadFileBackedTaskManager() throws IOException {
         File file = new File("src/data/data.csv");
-        FileBackedTasksManager fileBackedManager = loadFromFile(file);
+        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
         Task task = new Task("Задача №1", "Описание задачи №1");
         fileBackedManager.saveTask(task);
@@ -103,9 +109,9 @@ public class FileBackedTasksManagerTest extends InMemoryTaskManagerTest <FileBac
     }
 
     @Test
-    public void checkListHistoryEmpty() {
+    public void checkListHistoryEmpty() throws IOException {
         File file = new File("src/Test/dataTestNotHistory.csv");
-        FileBackedTasksManager fileBackedManager = loadFromFile(file);
+        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
         Task task = new Task("Задача №1", "Описание задачи №1");
         fileBackedManager.saveTask(task);

@@ -23,6 +23,13 @@ public class InMemoryTaskManager implements TaskManager {
     protected Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
+    //Очистка всех задач
+    @Override
+    public void clean() {
+        taskStorage.clear();
+        epicStorage.clear();
+        subTaskStorage.clear();
+    }
     //Проверка пересечения задачи
     private void validate(Task task) {
 
@@ -161,7 +168,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeAllSubTask() {
         for (SubTask subTask: subTaskStorage.values()) {
-            historyManager.remove(subTask.getEpicId());
+            historyManager.remove(subTask.getId());
             prioritizedTasks.remove(subTask);
         }
         subTaskStorage.clear();
@@ -195,12 +202,25 @@ public class InMemoryTaskManager implements TaskManager {
         return task;
     }
 
+    //проверка есть ли Таск по id
+    @Override
+    public boolean chekTask(int id) {
+        boolean i = taskStorage.containsKey(id);
+        return i;
+    }
     //Получение подзадачи по id SUBTASK а так же добавление в историю просмотров
     @Override
     public SubTask getSubTask(int epicId) {
         SubTask subTask = subTaskStorage.get(epicId);
         historyManager.add(subTask);
         return subTask;
+    }
+
+    //проверка есть ли SubTask по id
+    @Override
+    public boolean chekSubTask(int id) {
+        boolean i = subTaskStorage.containsKey(id);
+        return i;
     }
 
     //Получение епика по id EPIK а так же добавление в историю просмотров
@@ -211,6 +231,13 @@ public class InMemoryTaskManager implements TaskManager {
         return epic;
     }
 
+    //проверка есть ли Epic по id
+    @Override
+    public boolean chekEpic(int id) {
+        boolean i = epicStorage.containsKey(id);
+        return i;
+    }
+
     //Получение всех задач TASK
     @Override
     public List<Task> getAllTasks() {
@@ -219,13 +246,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Получение всех епиков EPIK
     @Override
-    public List<Task> getAllEpic() {
+    public List<Epic> getAllEpic() {
         return new ArrayList<>(epicStorage.values());
     }
 
     //Получение всех подзадачь из всех эпиков без самих эпиков SUBTASK
     @Override
-    public List<Task> getAllSubTask() {
+    public List<SubTask> getAllSubTask() {
         return new ArrayList<>(subTaskStorage.values());
     }
 

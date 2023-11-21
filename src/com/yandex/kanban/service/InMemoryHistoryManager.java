@@ -12,6 +12,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     private  Node head;
     private  Node tail;
 
+
     //Добавление с содержанием пред задачи тоесть в иметированный хвост
     private void saveLast(Task task) {
         final Node oldTail = tail;
