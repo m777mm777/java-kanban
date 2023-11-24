@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class HttpTaskManagerTest {
+public class HttpTaskManagerTest extends InMemoryHistoryManagerTest {
 
     KVServer server;
 

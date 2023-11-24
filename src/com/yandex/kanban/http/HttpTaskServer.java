@@ -28,7 +28,7 @@ public class HttpTaskServer {
     public TaskManager manager;
 
     public HttpTaskServer() throws IOException {
-        this.manager = Managers.getDefaultFileBacked();
+        this(Managers.getDefaultFileBacked());
     }
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
@@ -62,6 +62,8 @@ public class HttpTaskServer {
                     handleSubTaskByEpic(exchange);
                     break;
                 default:
+                    System.out.println("Такого ресурса нет");
+                    exchange.sendResponseHeaders(404,0);
             }
         } catch (IOException exception) {
             System.out.println("Ошибка при обработке запроса");
@@ -110,7 +112,6 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -128,6 +129,7 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
+                    String body = readText(exchange);
                     if (!body.isEmpty()) {
                         Task task = gson.fromJson(body, Task.class);
                         if (manager.chekTask(task.getId())) {
@@ -137,6 +139,10 @@ public class HttpTaskServer {
                             manager.saveTask(task);
                             exchange.sendResponseHeaders(200, 0);
                         }
+                    } else {
+                        System.out.println("Задача некорректная");
+                        exchange.sendResponseHeaders(400, 0);
+                        return;
                     }
                 } catch (Exception exception) {
                     exception.printStackTrace();
@@ -153,6 +159,9 @@ public class HttpTaskServer {
                     exchange.sendResponseHeaders(200, 0);
                 }
             }
+            default:
+                System.out.println(metod + "Не используется");
+                exchange.sendResponseHeaders(405,0);
         }
     }
 
@@ -160,7 +169,6 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -178,6 +186,7 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
+                    String body = readText(exchange);
                     if (!body.isEmpty()) {
                     SubTask subTask = gson.fromJson(body, SubTask.class);
                     if (manager.chekSubTask(subTask.getId())) {
@@ -187,7 +196,11 @@ public class HttpTaskServer {
                         manager.saveSubTask(subTask);
                         exchange.sendResponseHeaders(200, 0);
                     }
-                }
+                    } else {
+                        System.out.println("Задача некорректная");
+                        exchange.sendResponseHeaders(400, 0);
+                        return;
+                    }
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
@@ -203,6 +216,9 @@ public class HttpTaskServer {
                     exchange.sendResponseHeaders(200, 0);
                 }
             }
+            default:
+                System.out.println(metod + "Не используется");
+                exchange.sendResponseHeaders(405,0);
         }
     }
 
@@ -210,7 +226,6 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -228,6 +243,7 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
+                    String body = readText(exchange);
                     if (!body.isEmpty()) {
                         Epic epic = gson.fromJson(body, Epic.class);
                         if (manager.chekEpic(epic.getId())) {
@@ -238,6 +254,7 @@ public class HttpTaskServer {
                             exchange.sendResponseHeaders(200, 0);
                         }
                     } else {
+                        System.out.println("Задача некорректная");
                         exchange.sendResponseHeaders(400, 0);
                         return;
                     }
@@ -256,6 +273,9 @@ public class HttpTaskServer {
                     exchange.sendResponseHeaders(200, 0);
                 }
             }
+            default:
+                System.out.println(metod + "Не используется");
+                exchange.sendResponseHeaders(405,0);
         }
     }
 

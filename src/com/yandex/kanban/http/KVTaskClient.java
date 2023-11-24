@@ -77,7 +77,9 @@ public class KVTaskClient {
         try {
             response = client
                     .send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
+            if (response.statusCode() != 200) {
+                throw new RequestFileException("Cant do register request, status code " + response.statusCode());
+            }
         } catch (RequestFileException | IOException | InterruptedException e) {
             throw new RequestFileException("Cant do request");
         }

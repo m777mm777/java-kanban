@@ -22,28 +22,19 @@ public class HttpTaskManager extends FileBackedTasksManager {
     public static final String HISTORY_KEY = "history";
     public KVTaskClient client;
     private Gson gson;
-    private Boolean loads;
+
 
     public HttpTaskManager(int port) throws IOException, InterruptedException {
-
         this(port, false);
-        this.loads = false;
-        this.client = new KVTaskClient(port);
-        this.gson = Managers.gsonAdapter();
-
-        if (loads) {
-            load();
-        }
     }
 
-    public HttpTaskManager(int port, Boolean loads) throws IOException, InterruptedException {
+    public HttpTaskManager(int port, Boolean isLoads) throws IOException, InterruptedException {
         super(null);
 
-        this.loads = loads;
         this.client = new KVTaskClient(port);
         this.gson = Managers.gsonAdapter();
 
-        if (loads) {
+        if (isLoads) {
             load();
         }
     }
