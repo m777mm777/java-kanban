@@ -4,6 +4,7 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 
@@ -83,5 +84,7 @@ public interface TaskManager {
     public void updateSubTask(SubTask subTask);
 
     public List<Task> getHistory();
+
+    public void loadFromFile(File file);
 
 }

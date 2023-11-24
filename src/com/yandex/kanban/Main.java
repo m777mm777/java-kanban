@@ -5,8 +5,8 @@ import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.service.Managers;
-import http.HttpTaskManager;
-import http.KVServer;
+import com.yandex.kanban.http.HttpTaskManager;
+import com.yandex.kanban.http.KVServer;
 
 import java.time.LocalDateTime;
 

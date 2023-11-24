@@ -4,8 +4,8 @@ package com.yandex.kanban.service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.yandex.kanban.service.file.FileBackedTasksManager;
-import http.HttpTaskManager;
-import http.LocalDateTimeAdapter;
+import com.yandex.kanban.http.HttpTaskManager;
+import com.yandex.kanban.http.LocalDateTimeAdapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,11 @@ public final class Managers {
 
     public static FileBackedTasksManager getDefaultFileBacked() throws IOException {
         return new FileBackedTasksManager(new File("src/data/data.csv"));
+
+    }
+
+    public static HttpTaskManager getDefault(int port, Boolean loads) throws IOException, InterruptedException {
+        return new HttpTaskManager(port, loads);
 
     }
 

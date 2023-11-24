@@ -1,4 +1,4 @@
-package http;
+package com.yandex.kanban.http;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

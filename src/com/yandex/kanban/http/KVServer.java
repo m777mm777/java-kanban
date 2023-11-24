@@ -1,4 +1,4 @@
-package http;
+package com.yandex.kanban.http;
 
 
 import com.sun.net.httpserver.HttpExchange;

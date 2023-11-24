@@ -1,6 +1,7 @@
 package com.yandex.kanban.model;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 public class Task {
@@ -10,6 +11,7 @@ public class Task {
     protected TaskStatus status;
     protected LocalDateTime startDateTime;
     protected int duration;
+    private final String timeDatePattern = "dd.MM.yyyy HH:mm";
 
     public Task(String name, String description, TaskStatus status, int id, LocalDateTime time, int minutes) {
         this.name = name;
@@ -24,8 +26,9 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
-        this.startDateTime = null;
+        this.startDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         this.duration = 0;
+
     }
 
     public Task(String name, String description, int id, LocalDateTime time, int minutes) {

@@ -1,4 +1,4 @@
-package http;
+package com.yandex.kanban.http;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -7,11 +7,11 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.service.Managers;
+import com.yandex.kanban.service.TaskManager;
 import com.yandex.kanban.service.file.FileBackedTasksManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
@@ -20,20 +20,22 @@ import java.util.List;
 
 public class HttpTaskServer {
 
-    public static final int PORT = 8080;
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    static Gson gson = new Gson();
+    private final int PORT = 8080;
+    private final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private Gson gson;
     private HttpServer server;
 
-    public FileBackedTasksManager manager;
+    public TaskManager manager;
 
     public HttpTaskServer() throws IOException {
-
         this.manager = Managers.getDefaultFileBacked();
-        this.gson = Managers.gsonAdapter();
-        server = HttpServer.create(new InetSocketAddress("LocalHost",PORT),0);
-        server.createContext("/tasks", this::handler);
+    }
 
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
+        this.manager = taskManager;
+        this.gson = Managers.gsonAdapter();
+        this.server = HttpServer.create(new InetSocketAddress("LocalHost",PORT),0);
+        server.createContext("/tasks", this::handler);
     }
 
     private void handler(HttpExchange exchange) {
@@ -108,8 +110,7 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        InputStream inputStream = exchange.getRequestBody();
-        String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -127,13 +128,15 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
-                    Task task = gson.fromJson(body, Task.class);
-                    if (manager.chekTask(task.getId())) {
-                        manager.updateTask(task);
-                        exchange.sendResponseHeaders(200, 0);
-                    } else {
-                        manager.saveTask(task);
-                        exchange.sendResponseHeaders(200, 0);
+                    if (!body.isEmpty()) {
+                        Task task = gson.fromJson(body, Task.class);
+                        if (manager.chekTask(task.getId())) {
+                            manager.updateTask(task);
+                            exchange.sendResponseHeaders(200, 0);
+                        } else {
+                            manager.saveTask(task);
+                            exchange.sendResponseHeaders(200, 0);
+                        }
                     }
                 } catch (Exception exception) {
                     exception.printStackTrace();
@@ -157,8 +160,7 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        InputStream inputStream = exchange.getRequestBody();
-        String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -176,6 +178,7 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
+                    if (!body.isEmpty()) {
                     SubTask subTask = gson.fromJson(body, SubTask.class);
                     if (manager.chekSubTask(subTask.getId())) {
                         manager.updateSubTask(subTask);
@@ -184,6 +187,7 @@ public class HttpTaskServer {
                         manager.saveSubTask(subTask);
                         exchange.sendResponseHeaders(200, 0);
                     }
+                }
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
@@ -206,8 +210,7 @@ public class HttpTaskServer {
 
         String metod = exchange.getRequestMethod();
         String query = exchange.getRequestURI().getQuery();
-        InputStream inputStream = exchange.getRequestBody();
-        String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+        String body = readText(exchange);
 
         switch (metod) {
             case "GET": {
@@ -225,13 +228,18 @@ public class HttpTaskServer {
             }
             case "POST": {
                 try {
-                    Epic epic = gson.fromJson(body, Epic.class);
-                    if (manager.chekEpic(epic.getId())) {
-                        manager.updateEpic(epic);
-                        exchange.sendResponseHeaders(200, 0);
+                    if (!body.isEmpty()) {
+                        Epic epic = gson.fromJson(body, Epic.class);
+                        if (manager.chekEpic(epic.getId())) {
+                            manager.updateEpic(epic);
+                            exchange.sendResponseHeaders(200, 0);
+                        } else {
+                            manager.saveEpic(epic);
+                            exchange.sendResponseHeaders(200, 0);
+                        }
                     } else {
-                        manager.saveEpic(epic);
-                        exchange.sendResponseHeaders(200, 0);
+                        exchange.sendResponseHeaders(400, 0);
+                        return;
                     }
                 } catch (Exception exception) {
                     exception.printStackTrace();
@@ -251,6 +259,10 @@ public class HttpTaskServer {
         }
     }
 
+    private String readText(HttpExchange h) throws IOException {
+        return new String(h.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+    }
+
     private void sendText(HttpExchange httpExchange, String response,int responseCode) throws IOException {
 
         if(response.isBlank()) {
@@ -267,11 +279,12 @@ public class HttpTaskServer {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-
-        final HttpTaskServer server = new HttpTaskServer();
+        File file = new File("src/data/data.csv");
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+        final HttpTaskServer server = new HttpTaskServer(fileBackedTasksManager);
         server.start();
 
-        File file = new File("src/data/data.csv");
+
         server.manager.loadFromFile(file);
 
         System.out.println("history" + server.manager.getHistory());

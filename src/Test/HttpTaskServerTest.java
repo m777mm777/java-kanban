@@ -7,7 +7,7 @@ import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.file.FileBackedTasksManager;
-import http.HttpTaskServer;
+import com.yandex.kanban.http.HttpTaskServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +31,9 @@ public class HttpTaskServerTest {
 
     @BeforeEach
     void startHttpTaskManager() throws IOException {
-        server = new HttpTaskServer();
-        server.start();
         manager = Managers.getDefaultFileBacked();
+        server = new HttpTaskServer(manager);
+        server.start();
     }
 
     @AfterEach

@@ -5,10 +5,19 @@ import com.yandex.kanban.model.SubTask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
+
+    protected int generatedIdGet() {
+        return generatedId;
+    }
+
+    protected void setGeneratedId(int generatedId) {
+        this.generatedId = generatedId;
+    }
 
     //Начальное значение id
     protected int generatedId = 0;
@@ -381,6 +390,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public void loadFromFile(File file){
     }
 
 }
